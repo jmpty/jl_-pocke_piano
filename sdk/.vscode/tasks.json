@@ -1,0 +1,208 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "all",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat all"
+            },
+            "command": "make all -j`nproc`",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+        ,{
+            "label": "clean",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean"
+            },
+            "command": "make clean -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ad15n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad15n_voice_toy"
+            },
+            "command": "make ad15n_voice_toy -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ad17n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad17n_voice_toy"
+            },
+            "command": "make ad17n_voice_toy -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ad14n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad14n_mcu"
+            },
+            "command": "make ad14n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ad18n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad18n_mcu"
+            },
+            "command": "make ad18n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ad14n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad14n_voice_toy"
+            },
+            "command": "make ad14n_voice_toy -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ac104n_mbox_mg",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ac104n_mbox_mg"
+            },
+            "command": "make ac104n_mbox_mg -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ad18n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad18n_voice_toy"
+            },
+            "command": "make ad18n_voice_toy -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ad15n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad15n_mcu"
+            },
+            "command": "make ad15n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ad17n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad17n_mcu"
+            },
+            "command": "make ad17n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ad15n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad15n_voice_toy"
+            },
+            "command": "make clean_ad15n_voice_toy -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ad17n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad17n_voice_toy"
+            },
+            "command": "make clean_ad17n_voice_toy -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ad14n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad14n_mcu"
+            },
+            "command": "make clean_ad14n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ad18n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad18n_mcu"
+            },
+            "command": "make clean_ad18n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ad14n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad14n_voice_toy"
+            },
+            "command": "make clean_ad14n_voice_toy -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ac104n_mbox_mg",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ac104n_mbox_mg"
+            },
+            "command": "make clean_ac104n_mbox_mg -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ad18n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad18n_voice_toy"
+            },
+            "command": "make clean_ad18n_voice_toy -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ad15n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad15n_mcu"
+            },
+            "command": "make clean_ad15n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ad17n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad17n_mcu"
+            },
+            "command": "make clean_ad17n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+    ]
+}
