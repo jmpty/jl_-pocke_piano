@@ -11,6 +11,7 @@
 #include "key.h"
 #include "bsp_loop.h"
 #include "vm_api.h"
+#include "dac_api.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -32,7 +33,8 @@ void toy_midi_app(void)
     u32 err;
     int msg[2];
 
-    log_info("toy midi mode!\n");
+    log_info("toy midi mode, auto loop all files!\n");
+    dac_vol(0, 31);
     decoder_init();
     midi_decode_init();
     key_table_sel((void *)midi_msg_filter);
@@ -89,7 +91,10 @@ void toy_midi_app(void)
             log_info("MSG_PLAY_FILE1\n");
             err = play_one_file(&midi_pctl[0]);
             if (err) {
+                log_info("midi play fail 0x%x, try next\n", err);
                 play_next_file(&midi_pctl[0]);
+            } else {
+                log_info("midi playing findex %d ftotal %d\n", midi_pctl[0].findex, midi_pctl[0].ftotal);
             }
             break;
 
@@ -129,11 +134,8 @@ void toy_midi_app(void)
         case MSG_CHANGE_WORK_MODE:
             goto __toy_midi_exit;
         case MSG_500MS:
-            if ((MUSIC_PLAY != get_decoder_status(midi_pctl[0].p_dec_obj)) && \
-                (MUSIC_PLAY != get_decoder_status(midi_pctl[1].p_dec_obj))) {
-                vm_pre_erase();
-                sys_idle_deal(-2);
-            }
+            /* 自动循环播放，曲间不进休眠 */
+            break;
         default:
             common_msg_deal(&msg[0]);
             break;

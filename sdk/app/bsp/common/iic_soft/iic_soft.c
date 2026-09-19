@@ -1,15 +1,36 @@
 //#include "system/init.h"
 #include "iic_soft.h"
 #include "gpio.h"
-extern void delay(unsigned int cnt);
+extern void udelay(u32 us);
+
+/* 开漏：高=释放+上拉，低=输出0 */
+static void iic_pin_prep(u32 pin)
+{
+    gpio_set_pull_down(pin, 0);
+    gpio_set_pull_up(pin, 1);
+    gpio_set_die(pin, 1);
+    gpio_set_dieh(pin, 1);
+    gpio_write(pin, 0);
+}
+
+static void iic_pin_h(u32 pin)
+{
+    gpio_set_direction(pin, 1);
+}
+
+static void iic_pin_l(u32 pin)
+{
+    gpio_write(pin, 0);
+    gpio_set_direction(pin, 0);
+}
 
 //软件IIC设备数据初始化
-const struct soft_iic_config soft_iic_cfg[] = {
+struct soft_iic_config soft_iic_cfg[] = {
     {
         //soft_iic0 data
-        .scl = IO_PORTA_01,   //IIC CLK脚
-        .sda = IO_PORTA_03,   //IIC DAT脚
-        .delay = 60,          //软件IIC延时参数，影响通讯时钟频率
+        .scl = IO_PORTB_00,   //IIC CLK脚  AD142A0: AW9523 SCL
+        .sda = IO_PORTB_01,   //IIC DAT脚  AD142A0: AW9523 SDA
+        .delay = 5,           //udelay us，约 100kHz
         .io_pu = 1,           //是否打开上拉电阻，如果外部电路没有焊接上拉电阻需要置1
     },
 #if 0
@@ -32,15 +53,11 @@ const struct soft_iic_config soft_iic_cfg[] = {
 
 #define IIC_SCL_SET_PD(scl, on) \
     gpio_set_pull_down(scl, on)
-
 #define IIC_SCL_SET_DIE(scl, on) \
     gpio_set_die(scl, on)
 
-#define IIC_SCL_H(scl)    \
-    gpio_write(scl, 1)
-
-#define IIC_SCL_L(scl)    \
-    gpio_write(scl, 0)
+#define IIC_SCL_H(scl)    iic_pin_h(scl)
+#define IIC_SCL_L(scl)    iic_pin_l(scl)
 
 #define IIC_SDA_DIR(sda, val) \
     gpio_set_direction(sda, val)
@@ -54,11 +71,8 @@ const struct soft_iic_config soft_iic_cfg[] = {
 #define IIC_SDA_SET_DIE(sda, on) \
     gpio_set_die(sda, on)
 
-#define IIC_SDA_H(sda)    \
-    gpio_write(sda, 1)
-
-#define IIC_SDA_L(sda)    \
-    gpio_write(sda, 0)
+#define IIC_SDA_H(sda)    iic_pin_h(sda)
+#define IIC_SDA_L(sda)    iic_pin_l(sda)
 
 #define IIC_SDA_READ(sda) \
     gpio_read(sda)
@@ -90,6 +104,13 @@ static inline u32 iic_get_io_pu(soft_iic_dev iic)
 }
 
 
+void soft_iic_set_pins(soft_iic_dev iic, u32 scl, u32 sda)
+{
+    u8 id = iic_get_id(iic);
+    soft_iic_cfg[id].scl = scl;
+    soft_iic_cfg[id].sda = sda;
+}
+
 int soft_iic_init(soft_iic_dev iic)
 {
     u32 scl, sda;
@@ -97,22 +118,10 @@ int soft_iic_init(soft_iic_dev iic)
     scl = iic_get_scl(iic);
     sda = iic_get_sda(iic);
 
-    IIC_SCL_DIR(scl, 0);
-    IIC_SCL_SET_PD(scl, 0);
-    IIC_SCL_SET_DIE(scl, 1);
-    IIC_SCL_L(scl);
-    IIC_SDA_DIR(sda, 0);
-    IIC_SDA_SET_PD(sda, 0);
-    IIC_SDA_SET_DIE(sda, 1);
+    iic_pin_prep(scl);
+    iic_pin_prep(sda);
     IIC_SDA_H(sda);
     IIC_SCL_H(scl);
-    if (iic_get_io_pu(iic)) {
-        IIC_SCL_SET_PU(scl, 1);
-        IIC_SDA_SET_PU(sda, 1);
-    } else {
-        IIC_SCL_SET_PU(scl, 0);
-        IIC_SDA_SET_PU(sda, 0);
-    }
     return 0;
 }
 
@@ -152,16 +161,16 @@ void soft_iic_start(soft_iic_dev iic)
     dly_t = iic_get_delay(iic);
 
     IIC_SDA_H(sda);
-    delay(dly_t);
+    udelay(dly_t);
 
     IIC_SCL_H(scl);
-    delay(dly_t * 2);
+    udelay(dly_t * 2);
 
     IIC_SDA_L(sda);
-    delay(dly_t);
+    udelay(dly_t);
 
     IIC_SCL_L(scl);
-    delay(dly_t);
+    udelay(dly_t);
 }
 
 void soft_iic_stop(soft_iic_dev iic)
@@ -173,13 +182,13 @@ void soft_iic_stop(soft_iic_dev iic)
     dly_t = iic_get_delay(iic);
 
     IIC_SDA_L(sda);
-    delay(dly_t);
+    udelay(dly_t);
 
     IIC_SCL_H(scl);
-    delay(dly_t * 2);
+    udelay(dly_t * 2);
 
     IIC_SDA_H(sda);
-    delay(dly_t);
+    udelay(dly_t);
 }
 
 static u8 soft_iic_check_ack(soft_iic_dev iic)
@@ -193,20 +202,20 @@ static u8 soft_iic_check_ack(soft_iic_dev iic)
 
     IIC_SDA_DIR(sda, 1);
     IIC_SCL_L(scl);
-    delay(dly_t);
+    udelay(dly_t);
 
     IIC_SCL_H(scl);
-    delay(dly_t);
+    udelay(dly_t);
 
     if (IIC_SDA_READ(sda) == 0) {
         ack = 1;
     } else {
         ack = 0;
     }
-    delay(dly_t);
+    udelay(dly_t);
 
     IIC_SCL_L(scl);
-    delay(dly_t);
+    udelay(dly_t);
     IIC_SDA_DIR(sda, 0);
     IIC_SDA_L(sda);
 
@@ -222,13 +231,13 @@ static void soft_iic_rx_ack(soft_iic_dev iic)
     dly_t = iic_get_delay(iic);
 
     IIC_SDA_L(sda);
-    delay(dly_t);
+    udelay(dly_t);
 
     IIC_SCL_H(scl);
-    delay(dly_t * 2);
+    udelay(dly_t * 2);
 
     IIC_SCL_L(scl);
-    delay(dly_t);
+    udelay(dly_t);
 }
 
 static void soft_iic_rx_nack(soft_iic_dev iic)
@@ -240,13 +249,13 @@ static void soft_iic_rx_nack(soft_iic_dev iic)
     dly_t = iic_get_delay(iic);
 
     IIC_SDA_H(sda);
-    delay(dly_t);
+    udelay(dly_t);
 
     IIC_SCL_H(scl);
-    delay(dly_t * 2);
+    udelay(dly_t * 2);
 
     IIC_SCL_L(scl);
-    delay(dly_t);
+    udelay(dly_t);
 }
 
 u8 soft_iic_tx_byte(soft_iic_dev iic, u8 byte)
@@ -265,13 +274,13 @@ u8 soft_iic_tx_byte(soft_iic_dev iic, u8 byte)
         } else {
             IIC_SDA_L(sda);
         }
-        delay(dly_t);
+        udelay(dly_t);
 
         IIC_SCL_H(scl);
-        delay(dly_t * 2);
+        udelay(dly_t * 2);
 
         IIC_SCL_L(scl);
-        delay(dly_t);
+        udelay(dly_t);
     }
     return soft_iic_check_ack(iic);
 }
@@ -288,19 +297,19 @@ u8 soft_iic_rx_byte(soft_iic_dev iic, u8 ack)
     IIC_SDA_DIR(sda, 1);
 
     for (i = 0; i < 8; i++) {
-        delay(dly_t);
+        udelay(dly_t);
 
         IIC_SCL_H(scl);
-        delay(dly_t);
+        udelay(dly_t);
 
         byte = byte << 1;
         if (IIC_SDA_READ(sda)) {
             byte |= 1;
         }
-        delay(dly_t);
+        udelay(dly_t);
 
         IIC_SCL_L(scl);
-        delay(dly_t);
+        udelay(dly_t);
     }
 
     IIC_SDA_DIR(sda, 0);

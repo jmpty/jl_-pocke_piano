@@ -143,6 +143,7 @@ INCLUDES := \
 	-Iapp/bsp/common \
 	-Iapp/bsp/common/fs \
 	-Iapp/bsp/common/iic_soft \
+	-Iapp/bsp/common/aw9523 \
 	-Iapp/bsp/common/eeprom \
 	-Iapp/bsp/common/msg \
 	-Iapp/bsp/common/file_operate \
@@ -228,6 +229,8 @@ c_SRC_FILES := \
 	app/bsp/common/fs/vfs.c \
 	app/bsp/common/fs/vfs_fat.c \
 	app/bsp/common/fs/vfs_resource.c \
+	app/bsp/common/aw9523/aw9523.c \
+	app/bsp/common/iic_soft/iic_soft.c \
 	app/bsp/common/key/key.c \
 	app/bsp/common/key/key_drv_ad.c \
 	app/bsp/common/key/key_drv_io.c \

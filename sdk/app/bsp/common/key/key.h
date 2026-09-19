@@ -19,11 +19,21 @@
 /*按键输出注册接口*/
 typedef int (*key_emit_t)(u8 key_status, u8 key_num, u8 key_type);
 
+#ifndef KEY_IO_EN
 #define KEY_IO_EN         	    0   ///<IO按键使能
+#endif
+#ifndef KEY_AD_EN
 #define KEY_AD_EN				1	///<AD按键使能
+#endif
+#ifndef KEY_MATRIX_EN
 #define KEY_MATRIX_EN			0	///<矩阵按键使能
+#endif
+#ifndef KEY_IR_EN
 #define KEY_IR_EN				0   ///<IR按键使能
+#endif
+#ifndef KEY_TOUCH_EN
 #define KEY_TOUCH_EN			0   ///<触摸按键使能
+#endif
 
 /*双击按键使能*/
 #define KEY_DOUBLE_CLICK_EN		0

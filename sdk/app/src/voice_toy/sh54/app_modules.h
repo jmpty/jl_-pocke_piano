@@ -78,7 +78,7 @@
 #define __APP_MODULES_CPU_H__
 
 //  驱动使能
-#define EXT_FLASH_EN 0 //  外挂资源flash使能
+#define EXT_FLASH_EN 0 //  25Q64 是 SFC 程序 Flash，不是第二颗外挂资源 flash
 #define TFG_SD_EN 0 //  SDMMC驱动使能
 
 //  文件系统

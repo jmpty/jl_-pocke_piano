@@ -1,0 +1,1786 @@
+# depslib dependency file v1.0
+1789821331 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\aw9523\aw9523.c
+	"aw9523.h"
+	"iic_soft.h"
+	"gpio.h"
+	"log.h"
+
+1789821331 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\aw9523\aw9523.h
+	"typedef.h"
+	"gpio.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\typedef.h
+	"asm_type.h"
+	"cpu.h"
+	"sfr.h"
+	"string.h"
+	"cpu.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\asm_type.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\cpu.h
+	"sfr.h"
+	"irq.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\sfr.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\irq.h
+	"hwi.h"
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\hwi.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\gpio.h
+	"typedef.h"
+
+1788057750 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\iic_soft\iic_soft.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\port_wkup.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\log.h
+	"cpu.h"
+	"typedef.h"
+	"uart.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\uart.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\decoder_api.c
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"hwi.h"
+	"decoder_api.h"
+	"vfs.h"
+	"circular_buf.h"
+	"audio.h"
+	"dac.h"
+	"ump3_api.h"
+	"midi_api.h"
+	"list/midi_ctrl_api.h"
+	"f1a_api.h"
+	"a_api.h"
+	"mp3_standard_api.h"
+	"wav_api.h"
+	"msg.h"
+	"speed_api.h"
+	"src_api.h"
+	"errno-base.h"
+	"decoder_msg_tab.h"
+	"eq.h"
+	"mio_api.h"
+	"app_config.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\config.h
+	"includes.h"
+	"common.h"
+	"errno-base.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\includes.h
+	"typedef.h"
+	"sfr.h"
+	"csfr.h"
+	"hwi.h"
+	"cpu.h"
+	"wdt.h"
+	"uart.h"
+	"jiffies.h"
+	"printf.h"
+	"string.h"
+	"gpio.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\csfr.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\wdt.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\jiffies.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\printf.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\common.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\errno-base.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\decoder_api.h
+	"if_decoder_ctrl.h"
+	"dac_api.h"
+	"sound_effect_api.h"
+	"decoder_msg_tab.h"
+	"decoder_mge.h"
+	"app_modules.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\if_decoder_ctrl.h
+	"string.h"
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\dac_api.h
+	"typedef.h"
+	"dac.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\dac.h
+	"typedef.h"
+	"dac_cpu.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\dac_cpu.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\sound_effect_api.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\decoder_msg_tab.h
+	"typedef.h"
+	"app_modules.h"
+
+1788080218 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\sh54\app_modules.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\decoder_mge.h
+	"if_decoder_ctrl.h"
+	"sound_effect_api.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\fs\vfs.h
+	"config.h"
+	"fat/ff_opr.h"
+	"fat/fat_resource.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\fs\fat\ff_opr.h
+	"typedef.h"
+	"simple_fat/simple_fat.h"
+	"tff.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\fs\simple_fat\simple_fat.h
+	"typedef.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\fs\fat\tff.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\fs\fat\fat_resource.h
+	"fat/ff_opr.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\circular_buf.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\audio.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\list\ump3_api.h
+	"if_decoder_ctrl.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\list\midi_api.h
+	"if_decoder_ctrl.h"
+	"MIDI_DEC_API.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\midi_dec_api.h
+	"if_decoder_ctrl.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\list\midi_ctrl_api.h
+	"decoder_api.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\list\f1a_api.h
+	"if_decoder_ctrl.h"
+	"app_modules.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\list\a_api.h
+	"if_decoder_ctrl.h"
+	"app_modules.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\list\mp3_standard_api.h
+	"if_decoder_ctrl.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\list\wav_api.h
+	"if_decoder_ctrl.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\msg\msg.h
+	"typedef.h"
+	"uart.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\speed_api.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\src_api.h
+	"typedef.h"
+	"app_modules.h"
+	"resample_api.h"
+	"src.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\resample_api.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\src.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\eq.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\list\mio_api.h
+	"typedef.h"
+
+1788080218 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\app_config.h
+	"app_modules.h"
+	"usb_std_class_def.h"
+	"usb_common_def.h"
+	"usb_std_class_def.h"
+	"usb_common_def.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\usb_std_class_def.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\usb_common_def.h
+	"app_config.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\decoder_msg_tab.c
+	"typedef.h"
+	"msg.h"
+	"decoder_msg_tab.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\decoder_point.c
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"decoder_api.h"
+	"crc16.h"
+	"errno-base.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\crc16.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\list\a_api.c
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"hwi.h"
+	"decoder_api.h"
+	"decoder_cpu.h"
+	"vfs.h"
+	"circular_buf.h"
+	"errno-base.h"
+	"msg.h"
+	"decoder_msg_tab.h"
+	"app_config.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\decoder_cpu.h
+	"decoder_api.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\list\f1a_api.c
+	"f1a_api.h"
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"decoder_api.h"
+	"vfs.h"
+	"circular_buf.h"
+	"dac.h"
+	"msg.h"
+	"errno-base.h"
+	"decoder_msg_tab.h"
+	"app_config.h"
+	"decoder_cpu.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\list\f1x_parsing.c
+	"f1a_api.h"
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"decoder_api.h"
+	"vfs.h"
+	"circular_buf.h"
+	"errno-base.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\list\midi_api.c
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"decoder_api.h"
+	"vfs.h"
+	"circular_buf.h"
+	"dac.h"
+	"msg.h"
+	"errno-base.h"
+	"midi_api.h"
+	"MIDI_CTRL_API.h"
+	"MIDI_DEC_API.h"
+	"boot.h"
+	"decoder_msg_tab.h"
+	"dac.h"
+	"decoder_cpu.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\midi_ctrl_api.h
+	"MIDI_DEC_API.h"
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\boot.h
+	"asm_type.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\list\midi_ctrl_api.c
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"decoder_api.h"
+	"vfs.h"
+	"circular_buf.h"
+	"dac.h"
+	"msg.h"
+	"errno-base.h"
+	"midi_api.h"
+	"MIDI_CTRL_API.h"
+	"MIDI_DEC_API.h"
+	"boot.h"
+	"decoder_msg_tab.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\list\mio_phy.c
+	"cpu.h"
+	"mio_api.h"
+	"my_malloc.h"
+	"vfs.h"
+	"decoder_api.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\my_malloc.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\list\ump3_api.c
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"hwi.h"
+	"decoder_api.h"
+	"vfs.h"
+	"circular_buf.h"
+	"errno-base.h"
+	"msg.h"
+	"decoder_msg_tab.h"
+	"app_config.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\mio_api.c
+	"mio_api.h"
+	"vfs.h"
+	"gpio.h"
+	"clock.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\clock.h
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\mp_io.c
+	"cpu.h"
+	"typedef.h"
+	"config.h"
+	"sound_effect_api.h"
+	"circular_buf.h"
+	"decoder_api.h"
+	"vfs.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\decoder\sine_play.c
+	"sine_play.h"
+	"dac.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\sine_play.h
+	"typedef.h"
+	"tab_read.h"
+	"app_config.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\tab_read.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\encoder\encoder_api.c
+	"encoder_mge.h"
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"hwi.h"
+	"dev_manage.h"
+	"vfs.h"
+	"circular_buf.h"
+	"a_encoder.h"
+	"mp3_encoder.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\encoder\encoder_mge.h
+	"typedef.h"
+	"audio_enc_api.h"
+	"sound_effect_api.h"
+	"audio_adc.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\encoder\audio_enc_api.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\audio_adc.h
+	"typedef.h"
+	"audio_analog.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\audio_analog.h
+	"config.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\dev_mg\dev_manage.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\encoder\list\a_encoder.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\encoder\list\mp3_encoder.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\encoder\list\a_encoder.c
+	"encoder_mge.h"
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"hwi.h"
+	"app_modules.h"
+	"circular_buf.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\encoder\list\mp3_encoder.c
+	"encoder_mge.h"
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"hwi.h"
+	"app_modules.h"
+	"circular_buf.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\encoder\list\ump3_encoder.c
+	"encoder_mge.h"
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"hwi.h"
+	"app_modules.h"
+	"circular_buf.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\fs\nor_fs\nor_fs_resource.c
+	"nor_fs/nor_fs.h"
+	"common.h"
+	"uart.h"
+	"errno-base.h"
+	"vfs.h"
+	"boot.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\fs\nor_fs\nor_fs.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\fs\smpl_fat\smpl_fat_resource.c
+	"common.h"
+	"uart.h"
+	"errno-base.h"
+	"vfs.h"
+	"boot.h"
+	"ioctl_cmds.h"
+	"device.h"
+	"my_malloc.h"
+	"simple_fat/simple_fat.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\dev_mg\ioctl_cmds.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\dev_mg\device.h
+	"typedef.h"
+	"atomic.h"
+	"ioctl_cmds.h"
+	"dev_manage.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\dev_mg\atomic.h
+	"cpu.h"
+	"irq.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\fs\sydf\sydf_resource.c
+	"sydf_resource.h"
+	"vfs.h"
+	"my_malloc.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\fs\sydf\sydf_resource.h
+	"typedef.h"
+	"sydfile.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\fs\sydf\sydfile.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\fs\vfs.c
+	"vfs.h"
+	"errno-base.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\fs\vfs_fat.c
+	"vfs_fat.h"
+	"vfs.h"
+	"errno-base.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\fs\vfs_fat.h
+	"fat/ff_opr.h"
+	"fat/fat_resource.h"
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\fs\vfs_resource.c
+	"vfs.h"
+	"log.h"
+	"my_malloc.h"
+
+1788091399 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\iic_soft\iic_soft.c
+	"iic_soft.h"
+	"gpio.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key.c
+	"key.h"
+	"msg.h"
+	"decoder/sine_play.h"
+	"key_drv_io.h"
+	"key_drv_ad.h"
+	"key_matrix.h"
+	"key_ir.h"
+	"key_touch.h"
+	"log.h"
+
+1788053370 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key.h
+	"typedef.h"
+	"sdk_cfg.h"
+	"app_config.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\sdk_cfg.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key_drv_io.h
+	"gpio.h"
+	"key.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key_drv_ad.h
+	"adc_drv.h"
+	"gpio.h"
+	"key.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\adc_drv.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key_matrix.h
+	"key.h"
+	"gpio.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key_ir.h
+	"key.h"
+	"gpio.h"
+	"irflt.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\irflt.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key_touch.h
+	"key.h"
+	"gpio.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key_drv_ad.c
+	"key_drv_ad.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key_drv_io.c
+	"key_drv_io.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\key\key_ir.c
+	"key_ir.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\msg\msg.c
+	"msg.h"
+	"common.h"
+	"string.h"
+	"circular_buf.h"
+	"uart.h"
+	<stdarg.h>
+	"config.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\norflash\norflash.c
+	"norflash.h"
+	"app_config.h"
+	"cpu.h"
+	"device.h"
+	"spi1.h"
+	"spi_soft.h"
+	"typedef.h"
+	"gpio.h"
+	"errno-base.h"
+	"app_config.h"
+	"log.h"
+	"sdmmc/sd_host_api.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\norflash\norflash.h
+	"device.h"
+	"ioctl_cmds.h"
+	"printf.h"
+	"gpio.h"
+	"device_drive.h"
+	"malloc.h"
+	"app_config.h"
+	"jiffies.h"
+	"wdt.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\device_drive.h
+	"typedef.h"
+	"errno-base.h"
+	"ioctl.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\ioctl.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\spi1.h
+	"typedef.h"
+	"ioctl.h"
+	"config.h"
+	"clock.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\dev_mg\ioctl.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\spi_soft\spi_soft.h
+	"typedef.h"
+	"ioctl.h"
+	"config.h"
+	"clock.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\sdmmc\sd_host_api.h
+	"typedef.h"
+	"sfr.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\power_manage\app_power_mg.c
+	"app_power_mg.h"
+	"adc_drv.h"
+	"key.h"
+	"msg.h"
+	"efuse.h"
+	"clock.h"
+	"asm/power_interface.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\power_manage\app_power_mg.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\efuse.h
+	"boot.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\asm\power_interface.h
+	"typedef.h"
+	"power/p33.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\asm\power\p33.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\rtc\rtc.c
+	"cpu.h"
+	"asm/power/p33.h"
+	"asm/power/virtual_rtc.h"
+	"log.h"
+	"vm_api.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\vm\vm_api.h
+	"typedef.h"
+	"ioctl.h"
+	"dev_mg/device.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\sound_effect_list\echo_api.c
+	"echo_api.h"
+	"decoder_api.h"
+	"config.h"
+	"sound_effect_api.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\echo_api.h
+	"typedef.h"
+	"reverb_api.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\reverb_api.h
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\sound_effect_list\howling_pitchshifter_api.c
+	"howling_pitchshifter_api.h"
+	"decoder_api.h"
+	"config.h"
+	"sound_effect_api.h"
+	"howling_api.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\howling_pitchshifter_api.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\howling_api.h
+	"howling_pitchshifter_api.h"
+	"notch_howling_api.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\notch_howling_api.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\sound_effect_list\notch_howling_api.c
+	"notch_howling_api.h"
+	"decoder_api.h"
+	"config.h"
+	"sound_effect_api.h"
+	"howling_api.h"
+	"app_modules.h"
+	"log.h"
+	"circular_buf.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\sound_effect_list\pcm_eq_api.c
+	"pcm_eq_api.h"
+	"pcm_eq.h"
+	"decoder_api.h"
+	"config.h"
+	"sound_effect_api.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\pcm_eq_api.h
+	"typedef.h"
+	"pcm_eq.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\audio\pcm_eq.h
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\sound_effect_list\speed_api.c
+	"speed_api.h"
+	"typedef.h"
+	"decoder_api.h"
+	"config.h"
+	"sound_effect_api.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\sound_effect_list\vo_pitch_api.c
+	"typedef.h"
+	"config.h"
+	"sound_effect_api.h"
+	"vo_pitch_api.h"
+	"midi_file0_h.h"
+	"dac.h"
+	"audio_adc.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\vo_pitch\vo_pitch_api.h
+	"sound_effect_api.h"
+	"vo_pitch_phy.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\vo_pitch\vo_pitch_phy.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\vo_pitch\midi_file0_h.h
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\sound_effect_list\voicechanger.c
+	"voiceChanger_av_api.h"
+	"sound_effect_api.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\vo_changer\voicechanger_av_api.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\speaker\speak_api.c
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"audio.h"
+	"dac.h"
+	"audio_adc.h"
+	"circular_buf.h"
+	"dac_api.h"
+	"sound_effect_api.h"
+	"errno-base.h"
+	"sine_play.h"
+	"src_api.h"
+	"app_modules.h"
+	"vo_pitch_api.h"
+	"voiceChanger_av_api.h"
+	"pcm_eq_api.h"
+	"echo_api.h"
+	"notch_howling_api.h"
+	"howling_pitchshifter_api.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\uart_update\uart_update.c
+	"uart_update.h"
+	"app_config.h"
+	"app_modules.h"
+	"includes.h"
+	"asm/power_interface.h"
+	"asm/power/p33.h"
+	"cpu.h"
+	"uart_dev.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\uart_update\uart_update.h
+	"typedef.h"
+	"uart_dev.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\uart_dev.h
+	"jiffies.h"
+	"irq.h"
+	"typedef.h"
+	"wdt.h"
+	"includes.h"
+	"gpio.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\descriptor.c
+	"usb/device/usb_stack.h"
+	"usb/device/descriptor.h"
+	"usb/device/uac_audio.h"
+	"app_config.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\device\usb_stack.h
+	"typedef.h"
+	"asm/usb.h"
+	"usb/ch9.h"
+	"usb/usb_phy.h"
+	"usb/otg.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\asm\usb.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\ch9.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\usb_phy.h
+	"typedef.h"
+	"asm/usb.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\otg.h
+	"asm/usb.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\device\descriptor.h
+	"asm/usb.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\device\uac_audio.h
+	"asm/usb.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\hid.c
+	"usb/device/usb_stack.h"
+	"usb/device/hid.h"
+	"usb_config.h"
+	"app_config.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\device\hid.h
+	"typedef.h"
+	"asm/usb.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\usb_config.h
+	"typedef.h"
+	<string.h>
+	"app_config.h"
+	"device_drive.h"
+	"jiffies.h"
+	"asm/usb.h"
+	"usb/device/usb_stack.h"
+	"usb/host/usb_host.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\host\usb_host.h
+	"dev_mg/device.h"
+	"asm/usb.h"
+	"usb/ch9.h"
+	"usb/usb_phy.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\msd.c
+	"includes.h"
+	"usb/device/usb_stack.h"
+	"usb/device/msd.h"
+	"usb/scsi.h"
+	"usb_config.h"
+	"dev_mg/device.h"
+	"vfs.h"
+	"boot.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\device\msd.h
+	"asm/usb.h"
+	"usb_stack.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\device\usb\scsi.h
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\msd_upgrade.c
+	"usb/device/msd.h"
+	"usb/scsi.h"
+	"usb_config.h"
+	"cpu.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\task_pc.c
+	"app_config.h"
+	"msg.h"
+	"usb/usb_config.h"
+	"usb/device/usb_stack.h"
+	"usb/device/hid.h"
+	"usb/device/msd.h"
+	"dev_multiplex_api.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\uac1.c
+	"usb_config.h"
+	"usb/device/usb_stack.h"
+	"usb/device/uac_audio.h"
+	"app_config.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\uac_stream.c
+	"app_config.h"
+	"printf.h"
+	"usb/usb_config.h"
+	"usb/device/usb_stack.h"
+	"usb/device/uac_audio.h"
+	"usb/usr/usb_audio_interface.h"
+	"uac_stream.h"
+	"usb_config.h"
+	"circular_buf.h"
+	"sound_effect_api.h"
+	"log.h"
+	"uart.h"
+	"msg.h"
+	"dac_api.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\usr\usb_audio_interface.h
+	"typedef.h"
+	"src.h"
+	"src_api.h"
+	"dac_api.h"
+	"sound_effect_api.h"
+	"circular_buf.h"
+	"app_config.h"
+	"audio_adc.h"
+	"usb_common_def.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\uac_stream.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\usb_device.c
+	"usb/device/usb_stack.h"
+	"usb_config.h"
+	"usb/device/msd.h"
+	"usb/scsi.h"
+	"usb/device/hid.h"
+	"usb/device/uac_audio.h"
+	"irq.h"
+	"gpio.h"
+	"usb_common_def.h"
+	"app_config.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\device\user_setup.c
+	"usb/device/usb_stack.h"
+	"usb_config.h"
+	"usb/device/msd.h"
+	"usb/scsi.h"
+	"usb/device/hid.h"
+	"usb/device/uac_audio.h"
+	"irq.h"
+	"gpio.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\usb_bulk_transfer.c
+	"usb_config.h"
+	"usb_bulk_transfer.h"
+	"usb_ctrl_transfer.h"
+	"usb_storage.h"
+	"usb/host/usb_host.h"
+	"usb/usb_phy.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\usb_bulk_transfer.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\usb_ctrl_transfer.h
+	"usb/ch9.h"
+	"usb/usb_phy.h"
+	"usb_config.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\usb_storage.h
+	"dev_mg/device.h"
+	"usb/scsi.h"
+	"usb_bulk_transfer.h"
+	"usb/host/usb_host.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\usb_ctrl_transfer.c
+	"usb/host/usb_host.h"
+	"usb_ctrl_transfer.h"
+	"device_drive.h"
+	"gpio.h"
+	"usb/scsi.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\usb_host.c
+	"app_config.h"
+	"includes.h"
+	"device_drive.h"
+	"clock.h"
+	"usb_config.h"
+	"usb/host/usb_host.h"
+	"usb/usb_phy.h"
+	"usb_ctrl_transfer.h"
+	"usb_storage.h"
+	"adb.h"
+	"aoa.h"
+	"hid.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\adb.h
+	"system/task.h"
+	"device/device.h"
+	"usb/scsi.h"
+	"usb_bulk_transfer.h"
+	"usb/host/usb_host.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\aoa.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\hid.h
+	"system/task.h"
+	"device/device.h"
+	"usb/scsi.h"
+	"usb_bulk_transfer.h"
+	"usb/host/usb_host.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\host\usb_storage.c
+	"app_config.h"
+	"usb/host/usb_host.h"
+	"usb_ctrl_transfer.h"
+	"usb_bulk_transfer.h"
+	"device_drive.h"
+	"usb_storage.h"
+	"usb_config.h"
+	"app_config.h"
+	"msg/msg.h"
+	"asm/power_interface.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\usb_config.c
+	"usb_config.h"
+	"usb/scsi.h"
+	"irq.h"
+	"gpio.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\usb_host_config.c
+	"app_config.h"
+	"usb_config.h"
+	"usb/scsi.h"
+	"irq.h"
+	"gpio.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\usb_test.c
+	"app_config.h"
+	"usb/device/usb_stack.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\usb\usr\usb_audio_interface.c
+	"usb/device/msd.h"
+	"usb/device/usb_stack.h"
+	"usb/device/uac_audio.h"
+	"usb/usr/usb_audio_interface.h"
+	"log.h"
+	"uart.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\vm\new_vm\nvm_api.c
+	"typedef.h"
+	"errno-base.h"
+	"new_vm.h"
+	"device.h"
+	"log.h"
+	"common.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\new_vm.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\vm\old_vm\ovm_api.c
+	"old_vm.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\old_vm.h
+	"typedef.h"
+	"ioctl.h"
+	"dev_mg/device.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\vm\vm_api.c
+	"vm_api.h"
+	"config.h"
+	"app_config.h"
+	"log.h"
+	"new_vm.h"
+	"old_vm.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\adc_drv.c
+	"sfr.h"
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"clock.h"
+	"adc_drv.h"
+	"asm/power/p33.h"
+	"efuse.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\audio_adc_cpu.c
+	"config.h"
+	"audio.h"
+	"audio_adc.h"
+	"audio_analog.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\clock.c
+	"config.h"
+	"hwi.h"
+	"clock.h"
+	"math.h"
+	"common.h"
+	"efuse.h"
+	"log.h"
+	"stdlib.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\cpu.c
+	"config.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\dac_cpu.c
+	"dac_api.h"
+	"dac.h"
+	"config.h"
+	"audio.h"
+	"audio_analog.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\iic_hw.c
+	"iic_hw.h"
+	"clock.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\iic_hw.h
+	"includes.h"
+	"gpio.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\irflt.c
+	"sfr.h"
+	"cpu.h"
+	"config.h"
+	"irflt.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\led_spi.c
+	"gpio.h"
+	"clock.h"
+	"spi1.h"
+	"includes.h"
+	"typedef.h"
+	"cpu.h"
+	"errno-base.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\mcpwm.c
+	"sfr.h"
+	"cpu.h"
+	"config.h"
+	"gpio.h"
+	"clock.h"
+	"mcpwm.h"
+	"app_modules.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\mcpwm.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\port_init.c
+	"asm/power_interface.h"
+	"asm/power/p33.h"
+	<stdlib.h>
+	"app_config.h"
+	"typedef.h"
+	"gpio.h"
+	"usb/otg.h"
+	"usb/host/usb_host.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\port_wkup.c
+	"asm/power/p33.h"
+	"hwi.h"
+	"gpio.h"
+	"port_wkup.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\power_api.c
+	"asm/power_interface.h"
+	"usb/host/usb_host.h"
+	"usb/otg.h"
+	"tick_timer_driver.h"
+	"asm/power/p33.h"
+	"power_api.h"
+	"gpio.h"
+	"wdt.h"
+	"app_config.h"
+	"maskrom.h"
+	"dac_cpu.h"
+	"vm_api.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\tick_timer_driver.h
+	"config.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\power_api.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\maskrom.h
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\spi1.c
+	"log.h"
+	"gpio.h"
+	"clock.h"
+	"spi1.h"
+	"includes.h"
+	"typedef.h"
+	"cpu.h"
+	"errno-base.h"
+	"config.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\uart.c
+	"config.h"
+	"clock.h"
+	"uart.h"
+	"app_config.h"
+	"gpio.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\cpu\sh54\uart_dev.c
+	"cpu.h"
+	"config.h"
+	"clock.h"
+	"uart_dev.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\lib\adc_api.c
+	"circular_buf.h"
+	"string.h"
+	"uart.h"
+	"config.h"
+	"audio.h"
+	"audio_adc.h"
+	"audio_analog.h"
+	"sound_effect_api.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\lib\audio.c
+	"string.h"
+	"dac.h"
+	"hwi.h"
+	"sfr.h"
+	"cpu.h"
+	"config.h"
+	"audio.h"
+	"audio_analog.h"
+	"dac_api.h"
+	"audio_adc.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\lib\audio_mic_capless.c
+	"audio.h"
+	"audio_adc.h"
+	"sfr.h"
+	"cpu.h"
+	"config.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\lib\common.c
+	"config.h"
+	"common.h"
+	"circular_buf.h"
+	"clock.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\lib\dac_api.c
+	"dac_api.h"
+	"dac.h"
+	"circular_buf.h"
+	"string.h"
+	"uart.h"
+	"config.h"
+	"audio.h"
+	"decoder_mge.h"
+	"sound_effect_api.h"
+	"audio_analog.h"
+	"mio_api.h"
+	"sine_play.h"
+	"app_config.h"
+	"log.h"
+	"circular_buf.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\lib\my_malloc.c
+	"my_malloc.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\lib\tab_read.c
+	"tab_read.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\modules\soft_isr\soft_isr.c
+	"soft_isr.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\modules\soft_isr\soft_isr.h
+	"config.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\modules\timer\tick_timer_modules.c
+	"app_config.h"
+	"tick_timer_driver.h"
+	"msg.h"
+	"vm_api.h"
+	"dac_api.h"
+	"key.h"
+	"irflt.h"
+	"sdmmc/sd_host_api.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\modules\timer\tick_timer_sys.c
+	"app_config.h"
+	"tick_timer_driver.h"
+	"clock.h"
+	"msg.h"
+	"bsp_loop.h"
+	"app_power_mg.h"
+	"vm_api.h"
+	"dac_api.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\start\sh54_sh55\bsp_loop.h
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\start\sh54_sh55\bsp_loop.c
+	"bsp_loop.h"
+	"msg.h"
+	"errno-base.h"
+	"app_config.h"
+	"log.h"
+
+1788053658 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\start\sh54_sh55\device_list.c
+	"config.h"
+	"common.h"
+	"app_config.h"
+	"device.h"
+	"norflash.h"
+	"spi1.h"
+	"sdmmc/sd_host_api.h"
+	"usb/otg.h"
+	"app_config.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\start\sh54_sh55\init.c
+	"config.h"
+	"common.h"
+	"boot.h"
+	"tick_timer_driver.h"
+	"audio.h"
+	"msg.h"
+	"dac.h"
+	"dac_api.h"
+	"audio_adc.h"
+	"vfs.h"
+	"midi_api.h"
+	"src_api.h"
+	"device.h"
+	"ioctl_cmds.h"
+	"vm_api.h"
+	"vm_sfc.h"
+	"nor_fs/nor_fs.h"
+	"key.h"
+	"init.h"
+	"adc_drv.h"
+	"clock.h"
+	"app_power_mg.h"
+	"efuse.h"
+	"my_malloc.h"
+	"mio_api.h"
+	"sine_play.h"
+	"list/midi_ctrl_api.h"
+	"efuse_trim_value.h"
+	"flash_wp.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\vm_sfc.h
+	"typedef.h"
+	"ioctl.h"
+	"dev_mg/device.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\start\sh54_sh55\init.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\cpu\sh54\efuse_trim_value.h
+	"boot.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\common\flash_wp.h
+	"dev_mg/device.h"
+	"boot.h"
+	"typedef.h"
+	"sfr.h"
+	"vfs.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\start\sh54_sh55\main.c
+	"config.h"
+	"common.h"
+	"maskrom.h"
+	"asm/power/p33.h"
+	"app_config.h"
+	"init.h"
+	"vm_api.h"
+	"asm/power_interface.h"
+	"power_api.h"
+	"log.h"
+
+1788054415 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\app_config.c
+	"includes.h"
+	"app_modules.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\common\common_msg.c
+	"msg.h"
+	"config.h"
+	"key.h"
+	"common.h"
+	"string.h"
+	"circular_buf.h"
+	"vm_api.h"
+	"dac_api.h"
+	"toy_main.h"
+	"app_power_mg.h"
+	"adc_drv.h"
+	"audio.h"
+	"device_mge.h"
+	"usb/host/usb_host.h"
+	"usb/device/usb_stack.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_main.h
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\common\device_mge.h
+	"app_config.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\common\device_mge.c
+	"vfs.h"
+	"msg.h"
+	"errno-base.h"
+	"device.h"
+	"device_mge.h"
+	"update.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\update\update.h
+	"typedef.h"
+	"sfr.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\common\idle_deal.c
+	"msg.h"
+	"config.h"
+	"asm/power_interface.h"
+	"power_api.h"
+	"audio.h"
+	"dac_cpu.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\common\simple_play_file.c
+	"simple_play_file.h"
+	"device.h"
+	"device_mge.h"
+	"vfs.h"
+	"errno-base.h"
+	"sound_effect_api.h"
+	"vm_api.h"
+	"decoder_api.h"
+	"decoder_msg_tab.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\common\simple_play_file.h
+	"decoder_api.h"
+	"typedef.h"
+	"speed_api.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_idle\toy_idle.c
+	"toy_idle.h"
+	"toy_main.h"
+	"includes.h"
+	"msg.h"
+	"key.h"
+	"bsp_loop.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_idle\toy_idle.h
+	"typedef.h"
+	"key.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_idle\toy_idle_key.c
+	"typedef.h"
+	"key.h"
+	"msg.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_linein\toy_linein.c
+	"toy_linein.h"
+	"common.h"
+	"msg.h"
+	"circular_buf.h"
+	"bsp_loop.h"
+	"dac_api.h"
+	"audio_adc.h"
+	"app_modules.h"
+	"toy_main.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_linein\toy_linein.h
+	"typedef.h"
+	"key.h"
+	"decoder_mge.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_linein\toy_linein_key.c
+	"typedef.h"
+	"key.h"
+	"msg.h"
+	"app_config.h"
+
+1788088685 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_main.c
+	"app_config.h"
+	"toy_main.h"
+	"includes.h"
+	"cpu.h"
+	"config.h"
+	"typedef.h"
+	"errno-base.h"
+	"dac_api.h"
+	"msg.h"
+	"toy_music.h"
+	"toy_idle.h"
+	"toy_midi.h"
+	"toy_midi_ctrl.h"
+	"toy_speaker.h"
+	"toy_linein.h"
+	"toy_record.h"
+	"toy_usb_slave.h"
+	"toy_softoff.h"
+	"vm_api.h"
+	"vm_sfc.h"
+	"usb/usr/usb_audio_interface.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_music\toy_music.h
+	"decoder_api.h"
+	"includes.h"
+	"simple_play_file.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi.h
+	"config.h"
+	"typedef.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi_ctrl.h
+	"typedef.h"
+	"key.h"
+	"decoder_mge.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_speaker\toy_speaker.h
+	"typedef.h"
+	"key.h"
+	"decoder_mge.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_record\toy_record.h
+	"typedef.h"
+	"key.h"
+	"decoder_api.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_usb_slave\toy_usb_slave.h
+	"key.h"
+	"device/usb/otg.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_softoff\toy_softoff.h
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\midi_config.c
+	"midi_config.h"
+	"midi_api.h"
+	"MIDI_DEC_API.h"
+	"decoder_api.h"
+	"if_decoder_ctrl.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\midi_config.h
+	"config.h"
+	"decoder_api.h"
+	"MIDI_DEC_API.h"
+
+1788089003 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi.c
+	"toy_midi.h"
+	"app_modules.h"
+	"simple_play_file.h"
+	"toy_main.h"
+	"midi_config.h"
+	"midi_api.h"
+	"MIDI_DEC_API.h"
+	"device_mge.h"
+	"audio.h"
+	"msg.h"
+	"key.h"
+	"bsp_loop.h"
+	"vm_api.h"
+	"dac_api.h"
+	"log.h"
+
+1789822863 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi_ctrl.c
+	"toy_midi_ctrl.h"
+	"piano_keyboard_config.h"
+	"app_modules.h"
+	"common.h"
+	"msg.h"
+	"vfs.h"
+	"MIDI_DEC_API.h"
+	"midi_prog.h"
+	"list/midi_ctrl_api.h"
+	"bsp_loop.h"
+	"toy_main.h"
+	"decoder_api.h"
+	"decoder_msg_tab.h"
+	"Limiter.h"
+	"vm_api.h"
+	"aw9523.h"
+	"iic_soft.h"
+	"string.h"
+	"dac_api.h"
+	"wdt.h"
+	"log.h"
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\midi_prog.h
+
+1788052647 f:\project\2026\fw-ad15-n-main\sdk\include_lib\decoder\limiter.h
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi_ctrl_key.c
+	"key.h"
+	"msg.h"
+	"typedef.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi_key.c
+	"typedef.h"
+	"key.h"
+	"msg.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_music\toy_music.c
+	"toy_music.h"
+	"app_modules.h"
+	"simple_play_file.h"
+	"common.h"
+	"msg.h"
+	"key.h"
+	"toy_main.h"
+	"vfs.h"
+	"vm_api.h"
+	"circular_buf.h"
+	"jiffies.h"
+	"tick_timer_driver.h"
+	"device_mge.h"
+	"bsp_loop.h"
+	"decoder_api.h"
+	"decoder_msg_tab.h"
+	"dac_api.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_music\toy_music_key.c
+	"typedef.h"
+	"key.h"
+	"msg.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_record\enc_in_norfs.c
+	"toy_record.h"
+	"device.h"
+	"vfs.h"
+	"encoder_mge.h"
+	"device_mge.h"
+	"decoder_api.h"
+	"decoder_msg_tab.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_record\toy_record.c
+	"toy_record.h"
+	"device.h"
+	"vfs.h"
+	"msg.h"
+	"encoder_mge.h"
+	"device_mge.h"
+	"vm_api.h"
+	"decoder_api.h"
+	"decoder_msg_tab.h"
+	"simple_play_file.h"
+	"audio.h"
+	"dac_api.h"
+	"audio_adc.h"
+	"toy_main.h"
+	"bsp_loop.h"
+	"mp3_encoder.h"
+	"a_encoder.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_record\toy_record_key.c
+	"typedef.h"
+	"key.h"
+	"msg.h"
+	"app_config.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_softoff\toy_softoff.c
+	"toy_softoff.h"
+	"toy_main.h"
+	"common.h"
+	"msg.h"
+	"circular_buf.h"
+	"jiffies.h"
+	"device.h"
+	"vfs.h"
+	"toy_main.h"
+	"power_api.h"
+	"decoder_api.h"
+	"decoder_msg_tab.h"
+	"audio.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_speaker\toy_speaker.c
+	"toy_speaker.h"
+	"common.h"
+	"msg.h"
+	"dac_api.h"
+	"audio_adc.h"
+	"toy_main.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_speaker\toy_speaker_key.c
+	"typedef.h"
+	"key.h"
+	"msg.h"
+	"app_config.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_usb_slave\toy_usb_slave.c
+	"toy_usb_slave.h"
+	"common.h"
+	"msg.h"
+	"usb/usb_config.h"
+	"usb/device/hid.h"
+	"usb/device/msd.h"
+	"usb/usr/usb_audio_interface.h"
+	"clock.h"
+	"dac_api.h"
+	"app_config.h"
+	"decoder_api.h"
+	"toy_main.h"
+	"bsp_loop.h"
+	"log.h"
+
+1788052647 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_usb_slave\toy_usb_slave_key.c
+	"typedef.h"
+	"key.h"
+	"msg.h"
+	"app_config.h"
+
+1789822468 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\piano_keyboard_config.h
+	"midi_prog.h"
+

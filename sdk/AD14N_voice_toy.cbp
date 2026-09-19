@@ -61,6 +61,7 @@
 <Add directory="app/bsp/common" />
 <Add directory="app/bsp/common/fs" />
 <Add directory="app/bsp/common/iic_soft" />
+<Add directory="app/bsp/common/aw9523" />
 <Add directory="app/bsp/common/eeprom" />
 <Add directory="app/bsp/common/msg" />
 <Add directory="app/bsp/common/file_operate" />
@@ -199,6 +200,10 @@
 <Unit filename="app/bsp/common/fs/vfs_fat.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/fs/vfs_fat.h" />
 <Unit filename="app/bsp/common/fs/vfs_resource.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/aw9523/aw9523.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/aw9523/aw9523.h" />
+<Unit filename="app/bsp/common/iic_soft/iic_soft.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/iic_soft/iic_soft.h" />
 <Unit filename="app/bsp/common/key/key.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/key/key.h" />
 <Unit filename="app/bsp/common/key/key_drv_ad.c"><Option compilerVer="CC"/></Unit>

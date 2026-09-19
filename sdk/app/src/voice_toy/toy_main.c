@@ -78,16 +78,13 @@ void app(void)
     vm_isr_response_index_register(IRQ_AUDIO_IDX);
     vm_isr_response_index_register(IRQ_TICKTMR_IDX);
 
-    u8 vol = 0;
-    u32 res = vm_read(VM_INDEX_VOL, &vol, sizeof(vol));
-    if ((vol <= 31) && (res == sizeof(vol))) {
-        dac_vol(0, vol);
-        log_info("powerup set vol : %d\n", vol);
-    }
+    u8 vol = 31;
+    dac_vol(0, vol);
+    log_info("powerup set vol max: %d\n", dac_vol('r', 0));
 
-    work_mode = TOY_MUSIC;
+    /* work_mode = TOY_MUSIC; */
     /* work_mode = TOY_MIDI; */
-    /* work_mode = TOY_MIDI_KEYBOARD; */
+    work_mode = TOY_MIDI_KEYBOARD;
     /* work_mode = TOY_SPEAKER; */
     /* work_mode = TOY_LINEIN; */
     /* work_mode = TOY_RECORD; */

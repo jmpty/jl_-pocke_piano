@@ -12,7 +12,8 @@ struct soft_iic_config {
     u8 io_pu;
 };
 
-extern const struct soft_iic_config soft_iic_cfg[];
+extern struct soft_iic_config soft_iic_cfg[];
+void soft_iic_set_pins(soft_iic_dev iic, u32 scl, u32 sda);
 
 int soft_iic_init(soft_iic_dev iic);
 void soft_iic_uninit(soft_iic_dev iic);

@@ -9,10 +9,13 @@
 #define DISABLE								0
 
 /*---------UART Configuration---------------*/
-#define UART_TX_OUTPUT_CH_EN        DISABLE
-#define UART_OUTPUT_CH_PORT			IO_PORTA_04
+#define UART_TX_OUTPUT_CH_EN        ENABLE
+#define UART_OUTPUT_CH_PORT			IO_PORTA_12  /* 串口日志 TX，1Mbps */
 
 /*---------KEY Configuration---------------*/
+/* AD142A0 14键琴：PA0 接 AW9523 INT，关闭 AD 键 */
+#define KEY_AD_EN					0
+#define KEY_IO_EN					0
 //AD KEY
 #define AD_KEY_CH_SEL				ADC_CH_PA0
 //IR KEY
@@ -42,7 +45,7 @@
 
 /*---------FLASH Configuration---------------*/
 #define TCFG_FLASH_SPI_TYPE_SELECT  1//1:flash 选择硬件spi; 0:flash use soft_spi
-#define TFG_SPI_UNIDIR_MODE_EN      DISABLE//外挂flash运行1bit模式
+#define TFG_SPI_UNIDIR_MODE_EN      ENABLE//外挂flash运行1bit模式
 #define SPI_SD_IO_REUSE             DISABLE//SPI_FLASH与SD卡模块IO复用使能
 
 #if TFG_SPI_UNIDIR_MODE_EN

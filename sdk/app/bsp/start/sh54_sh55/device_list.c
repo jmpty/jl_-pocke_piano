@@ -25,20 +25,20 @@
 #if (EXT_FLASH_EN)
 const struct spi_platform_data spi1_p_data = {
     .port = {
-         SPI1_GROUPB_IO
+         SPI1_GROUPC_IO
     },
     .mode = HW_SPI_WORK_MODE,
     .clk = 10000000,
     .role = SPI_ROLE_MASTER,
 };
-//norflash
+//norflash  25Q64 单线: CS=PA6 CLK=PA4 D0=PA5
 NORFLASH_DEV_PLATFORM_DATA_BEGIN(norflash_data)
 .spi_hw_num = SPI_HW_NUM,
-.spi_cs_port = IO_PORTA_05,//SPI_CS_PORT_SEL,
+.spi_cs_port = IO_PORTA_06,
 .spi_read_width = SPI_READ_DATA_WIDTH,
 .spi_pdata = &spi1_p_data,
 .start_addr = 0,
-.size = 2 * 1024 * 1024,
+.size = 8 * 1024 * 1024,
 NORFLASH_DEV_PLATFORM_DATA_END()
 #endif
 
