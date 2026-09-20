@@ -17,6 +17,7 @@ void enter_idle_deal(void)
 void exit_idle_deal(void)
 {
     dac_power_on(SR_DEFAULT, 0);
+    log_init(1000000);
 }
 
 /*----------------------------------------------------------------------------*/

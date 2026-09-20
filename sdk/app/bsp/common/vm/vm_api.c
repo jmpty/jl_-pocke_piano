@@ -13,6 +13,7 @@
 #define vm_read_api(id, buf, len)       		nvm_read_api(id, buf, len)
 #define vm_write_api(id, buf, len)      		nvm_write_api(id, buf, len)
 #define vm_pre_erase_api()              		nvm_erasure_next_api()
+#define vm_repair_api()                 		nvm_format_anotheri_api()
 
 #elif (SYS_MEMORY_SELECT == USE_OLD_VM)
 //旧版vm
@@ -21,6 +22,7 @@
 #define vm_read_api(id, buf, len)				old_vm_read(id, buf, len)
 #define vm_write_api(id, buf, len)				old_vm_write(id, buf, len)
 #define vm_pre_erase_api()
+#define vm_repair_api()
 
 #else
 
@@ -28,6 +30,7 @@
 #define vm_read_api(id, buf, len)				-1
 #define vm_write_api(id, buf, len)				-1
 #define vm_pre_erase_api()
+#define vm_repair_api()
 #endif
 
 int syscfg_vm_init(u32 mem_addr, u32 mem_size)
@@ -48,4 +51,9 @@ int vm_write(u32 id, u8 *data_buf, u16 len)
 void vm_pre_erase(void)
 {
     vm_pre_erase_api();
+}
+
+void vm_repair(void)
+{
+    vm_repair_api();
 }

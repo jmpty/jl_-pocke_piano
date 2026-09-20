@@ -23,6 +23,10 @@
 #include "app_power_mg.h"
 #include "efuse.h"
 #include "my_malloc.h"
+#include "app_config.h"
+#if TCFG_USB_SFC_UDISK_ENABLE
+#include "sfc_udisk.h"
+#endif
 #include "mio_api.h"
 #include "sine_play.h"
 #include "list/midi_ctrl_api.h"
@@ -46,6 +50,25 @@ void all_init_isr(void)
 }
 
 static struct vfs_attr vm_attr;
+static struct vfs_attr eeprom_attr;
+
+static int load_eeprom_attr(void)
+{
+    u32 err;
+    void *pvfs = 0;
+    void *pvfile = 0;
+
+    err = vfs_mount(&pvfs, (void *)NULL, (void *)NULL);
+    ASSERT(!err, "eeprom vfs mount : 0x%x\n", err)
+    err = vfs_openbypath(pvfs, &pvfile, "/app_area_head/EEPROM");
+    ASSERT(!err, "eeprom vfs openbypath : 0x%x\n", err)
+    err = vfs_ioctl(pvfile, FS_IOCTL_FILE_ATTR, (int)&eeprom_attr);
+    ASSERT(!err, "eeprom vfs ioctl : 0x%x\n", err)
+    vfs_file_close(&pvfile);
+    vfs_fs_close(&pvfs);
+    return 0;
+}
+
 int flash_info_init(void)
 {
     u32 err;
@@ -61,9 +84,11 @@ int flash_info_init(void)
     err = vfs_ioctl(pvfile, FS_IOCTL_FILE_ATTR, (int)&vm_attr);
     ASSERT(!err, "fii vfs ioctl : 0x%x\n", err)
     log_info("file size : 0x%x\nfile sclust : 0x%x\n", vm_attr.fsize, vm_attr.sclust);
-    log_info("boot info 0x%x\n", boot_info.flash_size);
     vfs_file_close(&pvfile);
     vfs_fs_close(&pvfs);
+
+    load_eeprom_attr();
+    log_info("EEPROM size : 0x%x\nEEPROM sclust : 0x%x\n", eeprom_attr.fsize, eeprom_attr.sclust);
 
     boot_info.vm.vm_saddr = vm_attr.sclust;
     boot_info.vm.vm_size = vm_attr.fsize;
@@ -88,37 +113,28 @@ AT_SPI_CODE/*该函数放置段不可更改*/
 u32 flash_code_protect_callback(u32 offset, u32 len)
 {
     u32 limit_addr = vm_attr.sclust;
-    /* log_info("0x%x 0x%x", limit_addr, offset); */
-    if ((offset < limit_addr) || ((offset + len) > boot_info.flash_size)) {
-        /* 超过正常擦写区域，不进行擦写操作 */
-        return 1;
-    } else {
-        /* 进行擦写操作 */
+    u32 ee_start = eeprom_attr.sclust;
+    u32 ee_end = ee_start + eeprom_attr.fsize;
+
+    /* EEPROM 区始终允许写（虚拟U盘可能破坏分区元数据导致 limit_addr 异常） */
+    if (ee_start && (offset >= ee_start) && ((offset + len) <= ee_end)) {
         return 0;
     }
+    if ((offset < limit_addr) || ((offset + len) > boot_info.flash_size)) {
+        return 1;
+    }
+    return 0;
 }
 
-static struct vfs_attr eeprom_attr;
 void vm_init_api(void)
 {
-    u32 err;
-    void *pvfs = 0;
-    void *pvfile = 0;
-    void *device = 0;
-    u32 capacity = 0;
+    int err;
 
-
-    err = vfs_mount(&pvfs, (void *)NULL, (void *)NULL);
-    ASSERT(!err, "fii vfs mount : 0x%x\n", err)
-    err = vfs_openbypath(pvfs, &pvfile, "/app_area_head/EEPROM");
-    ASSERT(!err, "fii vfs openbypath : 0x%x\n", err)
-    err = vfs_ioctl(pvfile, FS_IOCTL_FILE_ATTR, (int)&eeprom_attr);
-    ASSERT(!err, "fii vfs ioctl : 0x%x\n", err)
-    log_info("EEPROM size : 0x%x\nEEPROM sclust : 0x%x\n", eeprom_attr.fsize, eeprom_attr.sclust);
-    vfs_file_close(&pvfile);
-    vfs_fs_close(&pvfs);
-
-    syscfg_vm_init(eeprom_attr.sclust, eeprom_attr.fsize);
+    err = syscfg_vm_init(eeprom_attr.sclust, eeprom_attr.fsize);
+    if (err) {
+        /* repair 会格式化整块 EEPROM，导致下次开机配置全丢，此处仅打日志 */
+        log_info("vm init fail %d (piano cfg uses raw eeprom tail)\n", err);
+    }
     /*
      *demo
     u8 data_buf[10];
@@ -176,6 +192,9 @@ void system_init(void)
     //--src----------
     src_mode_init();
     /* device */
+#if TCFG_USB_SFC_UDISK_ENABLE
+    sfc_udisk_ops_init();
+#endif
     devices_init();
     flash_info_init();
     vm_init_api();

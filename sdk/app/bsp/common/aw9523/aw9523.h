@@ -26,16 +26,20 @@
 #define AW9523_CHIP_ID          0x23
 
 /*
- * 硬件：P00~P07、P10~P15 各接 10K 上拉 + 按键对地；P16/P17 未用。
+ * 硬件：P00~P07、P10~P15 各接 10K 上拉 + 按键对地。
+ * P15/P16/P17(P1_5~P1_7) 并联防浮空；固件仅用 bit0~13，bit14~15 软件屏蔽。
  * 固件：高阻输入读 IN，松开 IN=1，按下 IN=0。
  */
 
-/* 14 键：P00~P07(bit0~7)、P10~P15(bit8~13)；不含 P16/P17 */
+/* 14 键：P00~P07(bit0~7)、P10~P15(bit8~13)；bit14~15 掩掉 */
 #define AW9523_KEY_NUM          14
 #define AW9523_KEY_MASK         0x3FFF
 #define AW9523_KEY_CFG0         0xFF    /* P00~P07 输入 */
-#define AW9523_KEY_CFG1         0xFF    /* P10~P17 输入，未用脚在软件掩掉 */
-#define AW9523_KEY_IDLE_PORT    0x3FFF  /* 全松开：IN 低 14 位为 1 */
+#define AW9523_KEY_CFG1         0xFF    /* P10~P17 输入 */
+#define AW9523_KEY_IDLE_PORT    0x3FFF  /* 全松开：有效 14 位为 1 */
+#define AW9523_KEY_BAD_PORT     0x0000  /* 上电未稳定/读失败，非法 */
+/* 休眠唤醒：P16/P17 与 P15 并联，仅屏蔽 P16/P17 中断避免重复 */
+#define AW9523_INT_MASK1        0xC0
 
 /* AD142A0 封装丝印 PA0/PA13，按 GPIO 用 PA0 */
 #define AW9523_INT_IO           IO_PORTA_00
@@ -47,11 +51,14 @@
 #endif
 
 int aw9523_init(void);
+void aw9523_sleep_enter(void);
+int aw9523_resume(void);
 int aw9523_write_reg(u8 reg, u8 val);
 int aw9523_read_reg(u8 reg, u8 *val);
 u8 aw9523_int_pending(void);
 /* 读 IN 原始电平，bit=1 高/松开，bit=0 低/按下 */
 int aw9523_read_port(u16 *port);
+int aw9523_read_port_stable(u16 *port);
 /* bit=1 按下；bit0=P00 ... bit13=P15 */
 int aw9523_read_keys(u16 *pressed);
 void aw9523_int_isr(void);

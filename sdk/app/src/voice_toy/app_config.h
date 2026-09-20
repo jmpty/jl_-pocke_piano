@@ -85,8 +85,9 @@
 /*---------USB Configuration---------------*/
 #if HAS_USB_EN
 
-#define TCFG_PC_ENABLE						DISABLE  //PC模块使能
+#define TCFG_PC_ENABLE						DISABLE  //AD14N ota.bin无片内Flash拖文件升级loader，不启用
 #define TCFG_USB_MSD_CDROM_ENABLE           DISABLE
+#define TCFG_USB_SFC_UDISK_ENABLE           DISABLE
 #define TCFG_USB_EXFLASH_UDISK_ENABLE       DISABLE  //外掛FLASH UDISK
 #define TCFG_UDISK_ENABLE					DISABLE //U盘模块使能
 #define TCFG_HID_HOST_ENABLE				DISABLE
@@ -98,6 +99,7 @@
 
 #define TCFG_PC_ENABLE						DISABLE  //PC模块使能
 #define TCFG_USB_MSD_CDROM_ENABLE           DISABLE
+#define TCFG_USB_SFC_UDISK_ENABLE           DISABLE
 #define TCFG_USB_EXFLASH_UDISK_ENABLE       DISABLE  //外掛FLASH UDISK
 #define TCFG_UDISK_ENABLE					DISABLE //U盘模块使能
 #define TCFG_HID_HOST_ENABLE				DISABLE
@@ -123,8 +125,7 @@
 #include "usb_common_def.h"
 
 #undef USB_DEVICE_CLASS_CONFIG
-// #define  USB_DEVICE_CLASS_CONFIG             (MASSSTORAGE_CLASS|SPEAKER_CLASS|MIC_CLASS|HID_CLASS)  //配置usb从机模式支持的class
-#define  USB_DEVICE_CLASS_CONFIG             (SPEAKER_CLASS|MIC_CLASS|HID_CLASS)  //配置usb从机模式支持的class
+#define  USB_DEVICE_CLASS_CONFIG             (MASSSTORAGE_CLASS)  //琴键产品仅U盘升级
 
 #undef TCFG_OTG_MODE
 #define TCFG_OTG_MODE                       (TCFG_OTG_MODE_HOST|TCFG_OTG_MODE_SLAVE|TCFG_OTG_MODE_CHARGE|OTG_DET_DP_ONLY)

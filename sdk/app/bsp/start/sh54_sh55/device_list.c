@@ -90,6 +90,12 @@ const struct otg_dev_data otg_data = {
 };
 #endif
 extern const struct device_operations mass_storage_ops;
+#ifndef TCFG_USB_SFC_UDISK_ENABLE
+#define TCFG_USB_SFC_UDISK_ENABLE           DISABLE
+#endif
+#if TCFG_USB_SFC_UDISK_ENABLE
+#include "sfc_udisk.h"
+#endif
 REGISTER_DEVICES(device_table) = {
 #if (EXT_FLASH_EN)
 #if TCFG_USB_EXFLASH_UDISK_ENABLE
@@ -98,7 +104,11 @@ REGISTER_DEVICES(device_table) = {
     {.name = __EXT_FLASH_NANE, .ops = &norfs_dev_ops, .priv_data = (void *) &norflash_data},
 #endif
 #endif
+#if TCFG_USB_SFC_UDISK_ENABLE
+    {.name = __SFC_NANE, .ops = &sfc_udisk_dev_ops, .priv_data = (void *)NULL},
+#else
     {.name = __SFC_NANE, .ops = &sfc_dev_ops, .priv_data = (void *)NULL},
+#endif
 #if TFG_SD_EN
     {.name = __SD0_NANE, .ops = &sd_dev_ops, .priv_data = (void *)&sd0_data},
 #endif

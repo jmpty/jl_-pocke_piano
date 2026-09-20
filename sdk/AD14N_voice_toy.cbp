@@ -214,6 +214,7 @@
 <Unit filename="app/bsp/common/key/key_ir.h" />
 <Unit filename="app/bsp/common/msg/msg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/norflash/norflash.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/norflash/sfc_udisk.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/norflash/norflash.h" />
 <Unit filename="app/bsp/common/power_manage/app_power_mg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/power_manage/app_power_mg.h" />

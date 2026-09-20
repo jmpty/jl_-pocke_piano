@@ -26,7 +26,7 @@ copy app.bin voice_toy/app.bin
 
 
 cd voice_toy
-isd_download.exe -tonorflash -dev sh54 -boot 0xb00 -div8 -wait 300 -uboot uboot.boot -uboot_compress -app app.bin 0x22000 -res midi_cfg midi_ctrl_prog dir_midi
+isd_download.exe -tonorflash -dev sh54 -boot 0xb00 -div8 -wait 300 -uboot uboot.boot -uboot_compress -app app.bin 0x22000 -res midi_cfg midi_ctrl_prog dir_midi dir_a dir_song dir_eng dir_poetry dir_story dir_notice dir_bin_f1x
 @rem isd_download.exe -tonorflash -dev sh54 -boot 0xb00 -div8 -wait 300 -uboot uboot.boot -uboot_compress -app app.bin 0x22000 -res midi_cfg midi_ctrl_prog dir_midi dir_a dir_song dir_eng dir_poetry dir_story dir_notice dir_bin_f1x -wflash dir_song 0 [PA05_1B_NULL]
 
 @REM

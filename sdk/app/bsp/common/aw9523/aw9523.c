@@ -11,6 +11,8 @@ extern void mdelay(u32 ms);
 static volatile u8 aw9523_irq_flag;
 static u8 aw9523_addr_w = AW9523_ADDR_W;
 static u8 aw9523_addr_r = AW9523_ADDR_R;
+static u32 aw9523_iic_scl = IO_PORTB_00;
+static u32 aw9523_iic_sda = IO_PORTB_01;
 
 void aw9523_int_isr(void)
 {
@@ -105,6 +107,35 @@ int aw9523_read_port(u16 *port)
     aw9523_irq_flag = 0;
     *port = ((u16)p1 << 8 | p0) & AW9523_KEY_MASK;
     return 0;
+}
+
+int aw9523_read_port_stable(u16 *port)
+{
+    u16 sample_a;
+    u16 sample_b;
+    u8 retry;
+
+    if (port == NULL) {
+        return -1;
+    }
+
+    for (retry = 0; retry < 6; retry++) {
+        if (aw9523_read_port(&sample_a)) {
+            mdelay(2);
+            continue;
+        }
+        mdelay(1);
+        if (aw9523_read_port(&sample_b)) {
+            mdelay(2);
+            continue;
+        }
+        if (sample_a == sample_b) {
+            *port = sample_a;
+            return 0;
+        }
+        mdelay(2);
+    }
+    return -1;
 }
 
 int aw9523_read_keys(u16 *pressed)
@@ -279,6 +310,51 @@ static void aw9523_hw_reset_release(void)
 #endif
 }
 
+static void aw9523_int_io_init(void)
+{
+    gpio_set_direction(AW9523_INT_IO, 1);
+    gpio_set_die(AW9523_INT_IO, 1);
+    gpio_set_dieh(AW9523_INT_IO, 1);
+    gpio_set_pull_up(AW9523_INT_IO, 1);
+    gpio_set_pull_down(AW9523_INT_IO, 0);
+}
+
+static void aw9523_i2c_restore(void)
+{
+    aw9523_int_io_init();
+    soft_iic_set_pins(AW9523_IIC_IDX, aw9523_iic_scl, aw9523_iic_sda);
+    soft_iic_init(AW9523_IIC_IDX);
+}
+
+static void aw9523_int_enable(void)
+{
+    aw9523_write_reg(AW9523_REG_INT0, 0x00);
+    aw9523_write_reg(AW9523_REG_INT1, AW9523_INT_MASK1);
+}
+
+static void aw9523_int_disable(void)
+{
+    aw9523_write_reg(AW9523_REG_INT0, 0xFF);
+    aw9523_write_reg(AW9523_REG_INT1, 0xFF);
+}
+
+void aw9523_sleep_enter(void)
+{
+    u16 port;
+
+    aw9523_int_enable();
+    aw9523_read_port(&port);
+    aw9523_irq_flag = 0;
+}
+
+int aw9523_resume(void)
+{
+    aw9523_i2c_restore();
+    aw9523_int_disable();
+    aw9523_irq_flag = 0;
+    return 0;
+}
+
 static u8 aw9523_i2c_setup(u32 *scl, u32 *sda)
 {
     *scl = IO_PORTB_00;
@@ -300,18 +376,15 @@ int aw9523_init(void)
     u32 sda = IO_PORTB_01;
 
     aw9523_hw_reset_release();
-
-    gpio_set_direction(AW9523_INT_IO, 1);
-    gpio_set_die(AW9523_INT_IO, 1);
-    gpio_set_dieh(AW9523_INT_IO, 1);
-    gpio_set_pull_up(AW9523_INT_IO, 1);
-    gpio_set_pull_down(AW9523_INT_IO, 0);
+    aw9523_int_io_init();
 
     if (!aw9523_i2c_setup(&scl, &sda)) {
         log_info("AW9523 no ack, check SCL/SDA/VCC/RSTN\n");
         return -1;
     }
 
+    aw9523_iic_scl = scl;
+    aw9523_iic_sda = sda;
     soft_iic_set_pins(AW9523_IIC_IDX, scl, sda);
     soft_iic_init(AW9523_IIC_IDX);
 
@@ -322,7 +395,7 @@ int aw9523_init(void)
     log_info("AW9523 id 0x%x addr 0x%x\n", id, aw9523_addr_w);
 
     aw9523_key_hw_config();
-    mdelay(1);
+    mdelay(5);
     aw9523_dump_cfg();
 
     aw9523_irq_flag = 0;

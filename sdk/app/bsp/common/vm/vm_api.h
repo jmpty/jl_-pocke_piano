@@ -59,4 +59,5 @@ int syscfg_vm_init(u32 mem_addr, u32 mem_size);
 int vm_read(u32 id, u8 *data_buf, u16 len);
 int vm_write(u32 id, u8 *data_buf, u16 len);
 void vm_pre_erase(void);
+void vm_repair(void);
 #endif

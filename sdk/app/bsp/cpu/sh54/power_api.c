@@ -24,6 +24,7 @@
 #include "maskrom.h"
 #include "dac_cpu.h"
 #include "vm_api.h"
+#include "uart.h"
 
 #define ENABLE								1
 #define DISABLE								0
@@ -135,6 +136,7 @@ void dac_power_on(u32 sr, bool delay_flag)
 
 void sleep_exit_callback(u32 usec)
 {
+    uart_init(1000000);
     putchar('>');
 }
 

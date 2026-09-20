@@ -94,6 +94,11 @@ void nvm_erasure_next_api(void)
     nvm_pre_erasure_next(&g_nvm_obj, 1, 1);
 }
 
+u32 nvm_format_anotheri_api(void)
+{
+    return nvm_format_another(&g_nvm_obj);
+}
+
 
 
 /***************** 测试验证代码 ***********/

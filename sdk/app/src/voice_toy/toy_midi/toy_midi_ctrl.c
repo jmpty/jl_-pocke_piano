@@ -1,6 +1,7 @@
 
 #include "toy_midi_ctrl.h"
 #include "piano_keyboard_config.h"
+#include "app_config.h"
 #include "app_modules.h"
 #include "common.h"
 #include "msg.h"
@@ -14,13 +15,27 @@
 #include "decoder_msg_tab.h"
 #include "Limiter.h"
 #include "vm_api.h"
+#include "device.h"
+#include "ioctl_cmds.h"
+#include "flash_wp.h"
+#include "init.h"
 #include "aw9523.h"
 #include "iic_soft.h"
 #include "string.h"
 #include "dac_api.h"
 #include "wdt.h"
+#if TCFG_PC_ENABLE
+#include "usb/otg.h"
+#endif
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#include "simple_play_file.h"
+#include "device_mge.h"
+#include "midi_api.h"
+#endif
 
 #if defined(DECODER_MIDI_KEYBOARD_EN) && (DECODER_MIDI_KEYBOARD_EN)
+
+extern void mdelay(u32 ms);
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[midi_dec]"
@@ -52,9 +67,9 @@ static const u8 piano_note_tab[AW9523_KEY_NUM] = {
     83,  /* key2  上排最右 */
     71,  /* key3  下排最右 / 音量+ */
     69,  /* key4  下排 / 音量- */
-    67,  /* key5  下排 */
-    65,  /* key6  下排 */
-    64,  /* key7  下排 */
+    67,  /* key5  下排 / 乐器9 */
+    65,  /* key6  下排 / 上电进演奏，演奏中按退出 */
+    64,  /* key7  下排 / 乐器8 */
     72,  /* key8  上排最左 / 乐器1 */
     74,  /* key9  上排 / 乐器2 */
     76,  /* key10 上排 / 乐器3 */
@@ -75,10 +90,11 @@ static u8 piano_cur_instr;
 static u8 piano_cur_vol_level = PIANO_KB_VOL_LEVEL_DEF;
 static u8 piano_aw9523_ok;
 static u16 piano_stable_port;
-static u16 piano_boot_mask;         /* 上电配置键按住时屏蔽发声 */
+static u16 piano_boot_port_snap;    /* 上电瞬间按键快照，须在 decoder 初始化前采集 */
 static u32 piano_scan_jif;
 #if PIANO_KB_BOOT_KEY_SEL_EN
-static const u8 piano_kb_boot_instr_key[] = PIANO_KB_BOOT_INSTR_KEY_TABLE;
+static const u8 piano_kb_boot_instr_top_key[] = PIANO_KB_BOOT_INSTR_TOP_KEY_TABLE;
+static const u8 piano_kb_boot_instr_bot_key[] = PIANO_KB_BOOT_INSTR_BOT_KEY_TABLE;
 #endif
 #if PIANO_KB_VM_EN
 #define PIANO_KB_VM_MAGIC           0x504B4231UL
@@ -99,13 +115,27 @@ static const u8 piano_kb_dac_vol_map[PIANO_KB_VOL_LEVEL_CNT] = {
 static u16 piano_hold_jif[AW9523_KEY_NUM];
 static u8 piano_long_done[AW9523_KEY_NUM];
 #endif
-
+#if PIANO_KB_IDLE_SLEEP_EN
+static u16 piano_idle_500ms_cnt;
+#endif
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+static play_control piano_perf_pctl          AT(.midi_ctrl_buf);
+static u8 piano_perf_mode;
+static u8 piano_perf_findex = PIANO_KB_PERF_DEFAULT_SONG;
+static u8 piano_perf_mounted;
+static const char *const piano_perf_dir_tab[] = {
+    "/dir_midi",
+};
+#endif
 
 static u32 midi_ctrl_melody_trigger(void *priv, u8 key, u8 vel);
 static u32 midi_ctrl_melody_stop_trigger(void *priv, u8 key, u8 chn);
 static void midi_on_off_callback_init(dec_obj *obj,
                                       u32(*melody_callback)(void *, u8, u8),
                                       u32(*melody_stop_callback)(void *, u8, u8));
+static void piano_kb_decoder_apply_cfg(void);
+static u8 piano_kb_decoder_start(void);
+static void piano_kb_decoder_stop(void);
 
 static u32 toy_midi_ctrl_set_prog(dec_obj *obj, u8 prog, u8 chn)
 {
@@ -281,26 +311,76 @@ static void piano_kb_vm_default(void)
     }
 }
 
+static u32 piano_kb_eeprom_data_addr(void)
+{
+    struct vfs_attr *ee = get_eeprom_attr_p();
+
+    return ee->sclust + ee->fsize - sizeof(piano_kb_vm_t);
+}
+
+static int piano_kb_eeprom_save(void)
+{
+    void *dev;
+    u32 addr;
+    u32 sec;
+    int ret;
+
+    addr = piano_kb_eeprom_data_addr();
+    sec = addr & ~0xFFFUL;
+    dev = dev_open(__SFC_NANE, 0);
+    if (!dev) {
+        return -1;
+    }
+    norflash_set_write_protect(0);
+    dev_ioctl(dev, IOCTL_ERASE_SECTOR, sec);
+    ret = dev_byte_write(dev, &piano_kb_vm, addr, sizeof(piano_kb_vm));
+    norflash_set_write_protect(1);
+    dev_close(dev);
+    return (ret == (int)sizeof(piano_kb_vm)) ? 0 : -1;
+}
+
+static int piano_kb_eeprom_load(piano_kb_vm_t *out)
+{
+    void *dev;
+    u32 addr;
+    int ret;
+
+    addr = piano_kb_eeprom_data_addr();
+    dev = dev_open(__SFC_NANE, 0);
+    if (!dev) {
+        return -1;
+    }
+    ret = dev_byte_read(dev, out, addr, sizeof(*out));
+    dev_close(dev);
+    return (ret == (int)sizeof(*out)) ? 0 : -1;
+}
+
 static void piano_kb_vm_save(void)
 {
     piano_kb_vm.magic = PIANO_KB_VM_MAGIC;
-    vm_write(VM_INDEX_DEMO, (u8 *)&piano_kb_vm, sizeof(piano_kb_vm));
+    if (piano_kb_eeprom_save()) {
+        log_info("ee save fail addr 0x%x\n", piano_kb_eeprom_data_addr());
+        return;
+    }
+    log_info("ee save ok @0x%x instr %s pitch %d\n",
+             piano_kb_eeprom_data_addr(),
+             piano_kb_instr_name[piano_kb_vm.last_instr],
+             (int)piano_kb_vm.pitch);
 }
 
 static void piano_kb_vm_load(void)
 {
     piano_kb_vm_t tmp;
     u8 i;
-    int ret;
 
     piano_kb_vm_default();
-    ret = vm_read(VM_INDEX_DEMO, (u8 *)&tmp, sizeof(tmp));
-    if (ret != (int)sizeof(tmp)) {
-        piano_kb_vm_save();
+    if (piano_kb_eeprom_load(&tmp)) {
+        log_info("ee load fail addr 0x%x, use default\n", piano_kb_eeprom_data_addr());
         return;
     }
     if (tmp.magic != PIANO_KB_VM_MAGIC) {
-        piano_kb_vm_save();
+        log_info("ee magic bad 0x%x @0x%x, use default\n",
+                 tmp.magic, piano_kb_eeprom_data_addr());
         return;
     }
     if (tmp.last_instr >= PIANO_KB_BOOT_INSTR_NUM) {
@@ -340,16 +420,109 @@ static void piano_apply_volume(void)
 }
 #endif
 
+static void piano_kb_decoder_apply_cfg(void)
+{
+    if (NULL == midi_keyboard_obj) {
+        return;
+    }
+
+    {
+        EX_CH_VOL_PARM vol_parm;
+        u8 ci;
+
+        for (ci = 0; ci < CTRL_CHANNEL_NUM; ci++) {
+            vol_parm.cc_vol[ci] = 4096;
+        }
+        vol_parm.ex_vol_use_chn = 1;
+        toy_midi_ctrl_dec_config_api(midi_keyboard_obj, CMD_MIDI_SET_EX_VOL, &vol_parm);
+        midi_key_board_function_switch |= EX_VOL_ENABLE;
+        toy_midi_ctrl_dec_config_api(midi_keyboard_obj, CMD_MIDI_SET_SWITCH,
+                                     &midi_key_board_function_switch);
+    }
+
+    midi_on_off_callback_init(midi_keyboard_obj,
+                              midi_ctrl_melody_trigger,
+                              midi_ctrl_melody_stop_trigger);
+    toy_midi_ctrl_set_prog(midi_keyboard_obj,
+                           piano_kb_instr_prog[piano_cur_instr], PIANO_INSTR_CHN);
+#if PIANO_KB_VM_EN
+    piano_apply_volume();
+#endif
+}
+
+static u8 piano_kb_decoder_start(void)
+{
+    midi_keyboard_obj = decoder_io(NULL, BIT_MIDI_CTRL, NULL, 0);
+    if (NULL == midi_keyboard_obj) {
+        log_info("kb decoder start fail\n");
+        return 0;
+    }
+    piano_kb_decoder_apply_cfg();
+    return 1;
+}
+
+static void piano_kb_decoder_stop(void)
+{
+    if (midi_keyboard_obj) {
+        piano_all_note_off();
+        decoder_stop(midi_keyboard_obj, NEED_WAIT);
+        midi_keyboard_obj = NULL;
+    }
+}
+
 #if PIANO_KB_BOOT_KEY_SEL_EN
+static u8 piano_boot_port_valid(u16 port)
+{
+    if (port == AW9523_KEY_IDLE_PORT) {
+        return 0;
+    }
+    /* 冷启动未稳定时常误读为 0（全按下），不能当真 */
+    if (port == AW9523_KEY_BAD_PORT) {
+        return 0;
+    }
+    return 1;
+}
+
+static void piano_boot_port_capture(void)
+{
+    piano_boot_port_snap = AW9523_KEY_IDLE_PORT;
+    piano_aw9523_ok = (aw9523_init() == 0);
+    if (!piano_aw9523_ok) {
+        log_info("AW9523 init fail, key scan off\n");
+        return;
+    }
+    mdelay(5);
+    if (aw9523_read_port_stable(&piano_boot_port_snap) != 0) {
+        log_info("boot port read fail\n");
+        piano_boot_port_snap = AW9523_KEY_IDLE_PORT;
+        return;
+    }
+    if (!piano_boot_port_valid(piano_boot_port_snap)) {
+        if (piano_boot_port_snap == AW9523_KEY_BAD_PORT) {
+            log_info("boot port 0 invalid, ignore\n");
+        }
+        piano_boot_port_snap = AW9523_KEY_IDLE_PORT;
+        return;
+    }
+    log_info("boot port snap 0x%04x\n", piano_boot_port_snap);
+}
+
 static u8 piano_boot_instr_from_port(u16 port)
 {
     u8 i;
 
-    for (i = 0; i < PIANO_KB_BOOT_INSTR_NUM; i++) {
-        u8 key = piano_kb_boot_instr_key[i];
+    for (i = 0; i < PIANO_KB_BOOT_INSTR_TOP_NUM; i++) {
+        u8 key = piano_kb_boot_instr_top_key[i];
 
         if ((port & BIT(key)) == 0) {
             return i;
+        }
+    }
+    for (i = 0; i < PIANO_KB_BOOT_INSTR_BOT_NUM; i++) {
+        u8 key = piano_kb_boot_instr_bot_key[i];
+
+        if ((port & BIT(key)) == 0) {
+            return (u8)(PIANO_KB_BOOT_INSTR_TOP_NUM + i);
         }
     }
     return 0xFF;
@@ -413,13 +586,36 @@ static u8 piano_boot_apply_port(u16 port)
     }
     return instr;
 }
+
+static u16 piano_boot_pressed_mask(void)
+{
+    if (!piano_boot_port_valid(piano_boot_port_snap)) {
+        return 0;
+    }
+    return (~piano_boot_port_snap) & AW9523_KEY_MASK;
+}
+
+static u8 piano_boot_has_instr_key(u16 pressed)
+{
+    u8 i;
+
+    for (i = 0; i < PIANO_KB_BOOT_INSTR_TOP_NUM; i++) {
+        if (pressed & BIT(piano_kb_boot_instr_top_key[i])) {
+            return 1;
+        }
+    }
+    for (i = 0; i < PIANO_KB_BOOT_INSTR_BOT_NUM; i++) {
+        if (pressed & BIT(piano_kb_boot_instr_bot_key[i])) {
+            return 1;
+        }
+    }
+    return 0;
+}
 #endif
 
 static void piano_cfg_init(void)
 {
     u8 instr = (u8)PIANO_KB_DEFAULT_INSTR;
-
-    piano_boot_mask = 0;
 
 #if PIANO_KB_VM_EN
     piano_kb_vm_load();
@@ -430,16 +626,8 @@ static void piano_cfg_init(void)
 #endif
 
 #if PIANO_KB_BOOT_KEY_SEL_EN
-    if (piano_aw9523_ok) {
-        u16 port = AW9523_KEY_IDLE_PORT;
-
-        if (!aw9523_read_port(&port)) {
-            port &= AW9523_KEY_MASK;
-            if (port != AW9523_KEY_IDLE_PORT) {
-                instr = piano_boot_apply_port(port);
-                piano_boot_mask = (~port) & AW9523_KEY_MASK;
-            }
-        }
+    if (piano_aw9523_ok && piano_boot_port_valid(piano_boot_port_snap)) {
+        instr = piano_boot_apply_port(piano_boot_port_snap);
     }
 #endif
 
@@ -488,9 +676,6 @@ static void piano_key_hold_scan(u16 port)
     u8 i;
 
     for (i = 0; i < AW9523_KEY_NUM; i++) {
-        if (piano_boot_mask & BIT(i)) {
-            continue;
-        }
         if (0 == (port & BIT(i))) {
             if (piano_hold_jif[i] == 0) {
                 piano_hold_jif[i] = (u16)jiffies;
@@ -507,20 +692,262 @@ static void piano_key_hold_scan(u16 port)
 }
 #endif
 
-static void piano_key_baseline_sync(void)
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+static u8 piano_perf_key_to_findex(u8 key)
 {
-    u16 port = 0;
+    if (key >= AW9523_KEY_NUM || key == PIANO_KB_PERF_MODE_KEY) {
+        return 0;
+    }
+    return (key < PIANO_KB_PERF_MODE_KEY) ? (u8)(key + 1) : key;
+}
 
-    if (!piano_aw9523_ok || aw9523_read_port(&port)) {
+static u32 piano_perf_play_song(u8 findex)
+{
+    u32 err;
+
+    if (!piano_perf_mounted || findex == 0 || findex > piano_perf_pctl.ftotal) {
+        log_info("perf skip song %d total %d\n", findex, piano_perf_pctl.ftotal);
+        return 1;
+    }
+    piano_kb_decoder_stop();
+    piano_perf_pctl.findex = findex;
+    piano_perf_findex = findex;
+    dac_vol(0, 31);
+    err = play_one_file(&piano_perf_pctl);
+    if (err) {
+        log_info("perf play fail idx %d err 0x%x\n", findex, err);
+    } else {
+        log_info("perf playing idx %d / %d\n", findex, piano_perf_pctl.ftotal);
+        kick_decoder();
+    }
+    return err;
+}
+
+static void piano_perf_refresh_ftotal(void)
+{
+    void *pdir = NULL;
+
+    piano_perf_pctl.ftotal = 0;
+    if (!piano_perf_mounted) {
         return;
     }
-    piano_stable_port = port & AW9523_KEY_MASK;
+    if (0 == vfs_openbypath(piano_perf_pctl.pfs, &pdir, piano_perf_dir_tab[0])) {
+        vfs_ioctl(pdir, FS_IOCTL_DIR_FILE_TOTAL, (int)&piano_perf_pctl.ftotal);
+        vfs_file_close(&pdir);
+    }
+}
+
+static void piano_perf_init(void)
+{
+    memset(&piano_perf_pctl, 0, sizeof(piano_perf_pctl));
+    piano_perf_pctl.dev_index = INNER_FLASH_RO;
+    piano_perf_pctl.findex = PIANO_KB_PERF_DEFAULT_SONG;
+    piano_perf_pctl.dec_type = BIT_MIDI;
+    piano_perf_pctl.pdir = (void *)&piano_perf_dir_tab[0];
+    piano_perf_pctl.dir_total = sizeof(piano_perf_dir_tab) / sizeof(piano_perf_dir_tab[0]);
+    midi_decode_init();
+    if (simple_dev_fs_mount(&piano_perf_pctl)) {
+        piano_perf_mounted = 0;
+        log_info("perf dir mount fail\n");
+        return;
+    }
+    piano_perf_mounted = 1;
+    piano_perf_refresh_ftotal();
+    log_info("perf dir total %d\n", piano_perf_pctl.ftotal);
+}
+
+static void piano_perf_stop(void)
+{
+    if (piano_perf_pctl.p_dec_obj) {
+        decoder_stop(piano_perf_pctl.p_dec_obj, NEED_WAIT);
+        piano_perf_pctl.p_dec_obj = NULL;
+    }
+    if (piano_perf_pctl.pfile) {
+        vfs_file_close(&piano_perf_pctl.pfile);
+        piano_perf_pctl.pfile = NULL;
+    }
+}
+
+static void piano_perf_enter(void)
+{
+    u8 song = piano_perf_findex;
+
+    piano_perf_refresh_ftotal();
+    if (!piano_perf_mounted || piano_perf_pctl.ftotal == 0) {
+        log_info("perf enter fail, dir_midi empty or missing\n");
+        return;
+    }
+    if (song == 0 || song > piano_perf_pctl.ftotal) {
+        song = PIANO_KB_PERF_DEFAULT_SONG;
+    }
+    log_info("perf mode enter\n");
+    if (0 == piano_perf_play_song(song)) {
+        piano_perf_mode = 1;
+    } else {
+        log_info("perf enter fail, play err\n");
+        piano_kb_decoder_start();
+    }
+}
+
+static void piano_perf_exit(void)
+{
+    piano_perf_mode = 0;
+    piano_perf_stop();
+    piano_kb_decoder_start();
+    log_info("perf mode exit\n");
+}
+
+#if PIANO_KB_BOOT_KEY_SEL_EN
+static u8 piano_boot_perf_song_from_mask(u16 boot_mask)
+{
+    u8 i;
+    u8 findex;
+    u8 song = 0;
+
+    for (i = 0; i < AW9523_KEY_NUM; i++) {
+        if (i == PIANO_KB_PERF_MODE_KEY) {
+            continue;
+        }
+        if (0 == (boot_mask & BIT(i))) {
+            continue;
+        }
+        findex = piano_perf_key_to_findex(i);
+        if (findex != 0) {
+            song = findex;
+        }
+    }
+    return song;
+}
+
+static void piano_boot_perf_apply(void)
+{
+    u16 pressed = piano_boot_pressed_mask();
+    u8 song;
+
+    if (0 == (pressed & BIT(PIANO_KB_PERF_MODE_KEY))) {
+        return;
+    }
+    if (piano_boot_has_instr_key(pressed)) {
+        log_info("boot perf skip, instr key held\n");
+        return;
+    }
+    song = piano_boot_perf_song_from_mask(pressed);
+    if (song != 0) {
+        piano_perf_findex = song;
+    }
+    log_info("boot perf enter song %d\n", piano_perf_findex);
+    piano_perf_enter();
+}
+#endif
+
+static void piano_perf_select_key(u8 key)
+{
+    u8 findex = piano_perf_key_to_findex(key);
+
+    if (findex == 0) {
+        return;
+    }
+    piano_perf_play_song(findex);
+}
+
+static void piano_perf_cleanup(void)
+{
+    if (piano_perf_mode) {
+        piano_perf_exit();
+    }
+    if (piano_perf_mounted) {
+        decoder_stop(piano_perf_pctl.p_dec_obj, NEED_WAIT);
+        simple_dev_fs_close(&piano_perf_pctl);
+        piano_perf_mounted = 0;
+    }
+}
+#endif
+
+static void piano_key_baseline_sync(void)
+{
+    u16 port = AW9523_KEY_IDLE_PORT;
+
+    if (!piano_aw9523_ok) {
+        return;
+    }
+    if (aw9523_read_port_stable(&port)) {
+        log_info("baseline read fail\n");
+        piano_stable_port = AW9523_KEY_IDLE_PORT;
+        return;
+    }
+    port &= AW9523_KEY_MASK;
+    if (port == AW9523_KEY_BAD_PORT) {
+        log_info("baseline port 0 invalid, use idle\n");
+        port = AW9523_KEY_IDLE_PORT;
+    }
+    piano_stable_port = port;
     piano_scan_jif = jiffies;
     log_info("port baseline 0x%x\n", piano_stable_port);
     if (piano_stable_port != AW9523_KEY_IDLE_PORT) {
         log_info("idle warn expect 0x%x\n", AW9523_KEY_IDLE_PORT);
     }
 }
+
+#if PIANO_KB_IDLE_SLEEP_EN
+static void piano_kb_idle_reset(void)
+{
+    piano_idle_500ms_cnt = 0;
+}
+
+static u8 piano_kb_can_sleep(void)
+{
+    if (!piano_aw9523_ok) {
+        return 0;
+    }
+#if TCFG_PC_ENABLE
+    if (usb_otg_online(0) != DISCONN_MODE) {
+        return 0;
+    }
+#endif
+    if (midi_keyboard_idle_cnt) {
+        return 0;
+    }
+    if (piano_stable_port != AW9523_KEY_IDLE_PORT) {
+        return 0;
+    }
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+    if (piano_perf_mode && piano_perf_pctl.p_dec_obj &&
+        (MUSIC_PLAY == get_decoder_status(piano_perf_pctl.p_dec_obj))) {
+        return 0;
+    }
+#endif
+    return 1;
+}
+
+static void piano_kb_wake_resume(void)
+{
+    log_init(1000000);
+    aw9523_resume();
+    piano_key_baseline_sync();
+    piano_kb_decoder_start();
+#if PIANO_KB_VM_EN
+    piano_apply_volume();
+#endif
+    piano_kb_idle_reset();
+    log_info("sleep wake\n");
+}
+
+static void piano_enter_sleep(void)
+{
+    log_info("sleep enter\n");
+    piano_all_note_off();
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+    if (piano_perf_mode) {
+        piano_perf_stop();
+    }
+#endif
+    piano_kb_decoder_stop();
+    aw9523_sleep_enter();
+    vm_pre_erase();
+    sys_idle_deal(-2);
+    piano_kb_wake_resume();
+}
+#endif
 
 /* IN: 1=松开 0=按下，对 port 做边沿检测 */
 static void piano_key_scan(void)
@@ -542,6 +969,9 @@ static void piano_key_scan(void)
         return;
     }
     port &= AW9523_KEY_MASK;
+    if (port == AW9523_KEY_BAD_PORT) {
+        return;
+    }
 
 #if PIANO_KB_RUNTIME_ADJ_EN
     piano_key_hold_scan(port);
@@ -552,6 +982,9 @@ static void piano_key_scan(void)
         return;
     }
 
+#if PIANO_KB_IDLE_SLEEP_EN
+    piano_kb_idle_reset();
+#endif
     log_info("port 0x%x\n", port);
     for (i = 0; i < AW9523_KEY_NUM; i++) {
         if (0 == (changed & BIT(i))) {
@@ -563,12 +996,23 @@ static void piano_key_scan(void)
                 continue;
             }
 #endif
-            if (piano_boot_mask & BIT(i)) {
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+            if (piano_perf_mode) {
+                if (i == PIANO_KB_PERF_MODE_KEY) {
+                    piano_perf_exit();
+                    continue;
+                }
+                piano_perf_select_key(i);
                 continue;
             }
+#endif
             piano_note_on(i);
         } else {
-            piano_boot_mask &= ~BIT(i);
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+            if (piano_perf_mode) {
+                continue;
+            }
+#endif
             piano_note_off(i);
         }
     }
@@ -592,41 +1036,33 @@ void toy_midi_keyboard_app(void)
 
     key_table_sel((void *)midi_keyboard_key_msg_filter);
 
-    decoder_init();
-    midi_key_board_function_switch = 0;
-    midi_ctrl_decode_init();
-    midi_keyboard_obj = decoder_io(NULL, BIT_MIDI_CTRL, NULL, 0);
-    if (NULL == midi_keyboard_obj) {
-        log_info("midi_keyboard init fail!\n");
-        return;
-    }
-
-    {
-        EX_CH_VOL_PARM vol_parm;
-        u8 ci;
-
-        for (ci = 0; ci < CTRL_CHANNEL_NUM; ci++) {
-            vol_parm.cc_vol[ci] = 4096;
-        }
-        vol_parm.ex_vol_use_chn = 1;
-        toy_midi_ctrl_dec_config_api(midi_keyboard_obj, CMD_MIDI_SET_EX_VOL, &vol_parm);
-        midi_key_board_function_switch |= EX_VOL_ENABLE;
-        toy_midi_ctrl_dec_config_api(midi_keyboard_obj, CMD_MIDI_SET_SWITCH, &midi_key_board_function_switch);
-    }
-
-    midi_on_off_callback_init(midi_keyboard_obj,
-                              midi_ctrl_melody_trigger,
-                              midi_ctrl_melody_stop_trigger);
-
+#if PIANO_KB_BOOT_KEY_SEL_EN
+    piano_boot_port_capture();
+#else
     piano_aw9523_ok = (aw9523_init() == 0);
     if (!piano_aw9523_ok) {
         log_info("AW9523 init fail, key scan off\n");
+    }
+#endif
+
+    decoder_init();
+    midi_key_board_function_switch = 0;
+    midi_ctrl_decode_init();
+    if (!piano_kb_decoder_start()) {
+        log_info("midi_keyboard init fail!\n");
+        return;
     }
 
     piano_cfg_init();
     if (piano_aw9523_ok) {
         piano_key_baseline_sync();
     }
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+    piano_perf_init();
+#if PIANO_KB_BOOT_KEY_SEL_EN
+    piano_boot_perf_apply();
+#endif
+#endif
 
     while (1) {
         piano_key_scan();
@@ -679,9 +1115,31 @@ __midikeypitch_bend:
             toy_midi_ctrl_pitch_bend(midi_keyboard_obj, pitch_val, cur_channal);
             break;
 
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+        case MSG_MIDI_FILE_END:
+        case MSG_MIDI_FILE_ERR:
+            if (piano_perf_mode) {
+                log_info("perf file end, replay idx %d\n", piano_perf_findex);
+                decoder_stop(piano_perf_pctl.p_dec_obj, NEED_WAIT);
+                piano_perf_pctl.p_dec_obj = NULL;
+                piano_perf_play_song(piano_perf_findex);
+                break;
+            }
+            break;
+#endif
         case MSG_CHANGE_WORK_MODE:
             goto __midi_decode_app_exit;
         case MSG_500MS:
+#if PIANO_KB_IDLE_SLEEP_EN
+            if (piano_kb_can_sleep()) {
+                piano_idle_500ms_cnt++;
+                if (piano_idle_500ms_cnt >= (PIANO_KB_IDLE_SLEEP_MS / 500U)) {
+                    piano_enter_sleep();
+                }
+            } else {
+                piano_kb_idle_reset();
+            }
+#endif
             break;
         default:
             common_msg_deal(&msg[0]);
@@ -689,7 +1147,10 @@ __midikeypitch_bend:
         }
     }
 __midi_decode_app_exit:
-    decoder_stop(midi_keyboard_obj, NEED_WAIT);
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+    piano_perf_cleanup();
+#endif
+    piano_kb_decoder_stop();
     key_table_sel(NULL);
 }
 

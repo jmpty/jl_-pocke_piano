@@ -124,6 +124,15 @@ void close_gpio(u8 soft_off)
         portb_value &= ~BIT(POWER_WAKEUP_IO & (~0xfff0));
     }
 
+#if UART_TX_OUTPUT_CH_EN
+    /* 休眠期间保留日志 TX(PA12)，避免唤醒后串口无输出 */
+    if (UART_OUTPUT_CH_PORT < GPIOB) {
+        porta_value &= ~BIT(UART_OUTPUT_CH_PORT % IO_GROUP_NUM);
+    } else if (UART_OUTPUT_CH_PORT < GPIOD) {
+        portb_value &= ~BIT(UART_OUTPUT_CH_PORT % IO_GROUP_NUM);
+    }
+#endif
+
     if (soft_off) {
         mask_io_cfg();
     }

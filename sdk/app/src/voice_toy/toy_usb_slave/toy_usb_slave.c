@@ -13,6 +13,11 @@
 #include "decoder_api.h"
 #include "toy_main.h"
 #include "bsp_loop.h"
+#include "device.h"
+#include "flash_wp.h"
+#if defined(TFG_DEV_UPGRADE_SUPPORT) && TFG_DEV_UPGRADE_SUPPORT
+#include "update.h"
+#endif
 #if TCFG_PC_ENABLE
 
 #define LOG_TAG_CONST       NORM
@@ -40,6 +45,9 @@ void toy_usb_slave_app(void)
 
     usb_sof_trim(NULL, NULL);
     usb_device_mode(0, 0);
+#if TCFG_USB_SFC_UDISK_ENABLE
+    norflash_set_write_protect(0);
+#endif
 #if TCFG_USB_EXFLASH_UDISK_ENABLE
     void *device = dev_open("ext_flsh", 0);
     if (device != NULL) {
@@ -101,10 +109,16 @@ void toy_usb_slave_app(void)
         case MSG_VOL_UP:
             break;
 #endif
+        case MSG_USB_PC_OUT:
         case MSG_PC_OUT:
-            log_info("MSG_PC_OUT\n");
+            log_info("pc out, try upgrade\n");
             usb_stop();
-            work_mode++;
+#if defined(TFG_DEV_UPGRADE_SUPPORT) && TFG_DEV_UPGRADE_SUPPORT
+            try_to_upgrade((char *)__SFC_NANE, TFG_UPGRADE_FILE_NAME);
+#endif
+            work_mode = TOY_MIDI_KEYBOARD;
+            post_msg(1, MSG_CHANGE_WORK_MODE);
+            break;
         case MSG_CHANGE_WORK_MODE:
             usb_pause();
             goto __out_t_usb_slave;
@@ -115,6 +129,9 @@ void toy_usb_slave_app(void)
         }
     }
 __out_t_usb_slave:
+#if TCFG_USB_SFC_UDISK_ENABLE
+    norflash_set_write_protect(1);
+#endif
 #if TCFG_USB_EXFLASH_UDISK_ENABLE
     if (device != NULL) {
         dev_close(device);

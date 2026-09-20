@@ -172,7 +172,13 @@ void usb_start()
 #endif
 
 #if TCFG_USB_MSD_CDROM_ENABLE
-    msd_register_disk("sfc", NULL); //默认介质为sfc
+    msd_register_disk("sfc", NULL); //CDROM模式介质
+#endif
+#ifndef TCFG_USB_SFC_UDISK_ENABLE
+#define TCFG_USB_SFC_UDISK_ENABLE           DISABLE
+#endif
+#if TCFG_USB_SFC_UDISK_ENABLE
+    msd_register_disk("sfc", NULL); //片内Flash虚拟U盘
 #endif
 
     msd_set_wakeup_handle(usb_msd_wakeup);
