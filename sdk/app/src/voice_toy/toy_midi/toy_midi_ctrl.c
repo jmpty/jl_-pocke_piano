@@ -919,15 +919,81 @@ static u8 piano_kb_can_sleep(void)
     return 1;
 }
 
+/*
+ * 休眠由按键 INT 唤醒：将当前按下键视为新按下并发声，避免 baseline 同步后
+ * 边沿为 0 导致“醒着但没声、需松再按”。
+ */
+static void piano_kb_wake_key_play(void)
+{
+    u16 port;
+    u16 pressed;
+    u8 i;
+
+    if (!piano_aw9523_ok) {
+        return;
+    }
+    if (aw9523_read_port_stable(&port)) {
+        log_info("wake port read fail\n");
+        piano_stable_port = AW9523_KEY_IDLE_PORT;
+        piano_scan_jif = jiffies;
+        return;
+    }
+    port &= AW9523_KEY_MASK;
+    if (port == AW9523_KEY_BAD_PORT) {
+        log_info("wake port 0 invalid\n");
+        piano_stable_port = AW9523_KEY_IDLE_PORT;
+        piano_scan_jif = jiffies;
+        return;
+    }
+
+    pressed = (~port) & AW9523_KEY_MASK;
+    piano_stable_port = AW9523_KEY_IDLE_PORT;
+
+    if (!pressed) {
+        piano_stable_port = port;
+        piano_scan_jif = jiffies;
+        log_info("wake no key port 0x%x\n", port);
+        return;
+    }
+
+    log_info("wake key play port 0x%x pressed 0x%x\n", port, pressed);
+
+#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+    if (piano_perf_mode) {
+        for (i = 0; i < AW9523_KEY_NUM; i++) {
+            if (0 == (pressed & BIT(i))) {
+                continue;
+            }
+            if (i == PIANO_KB_PERF_MODE_KEY) {
+                piano_perf_exit();
+                break;
+            }
+            piano_perf_select_key(i);
+        }
+        piano_stable_port = port;
+        piano_scan_jif = jiffies;
+        return;
+    }
+#endif
+
+    for (i = 0; i < AW9523_KEY_NUM; i++) {
+        if (pressed & BIT(i)) {
+            piano_note_on(i);
+        }
+    }
+    piano_stable_port = port;
+    piano_scan_jif = jiffies;
+}
+
 static void piano_kb_wake_resume(void)
 {
     log_init(1000000);
     aw9523_resume();
-    piano_key_baseline_sync();
     piano_kb_decoder_start();
 #if PIANO_KB_VM_EN
     piano_apply_volume();
 #endif
+    piano_kb_wake_key_play();
     piano_kb_idle_reset();
     log_info("sleep wake\n");
 }

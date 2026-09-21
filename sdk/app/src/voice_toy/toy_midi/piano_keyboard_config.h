@@ -98,8 +98,8 @@ typedef enum {
 #define PIANO_KB_PERF_MODE_KEY        6
 #define PIANO_KB_PERF_DEFAULT_SONG      1
 
-/* ---------- 低功耗：15s 无操作休眠，PA0/AW9523 INT 唤醒（非冷上电，不走乐器选择） ---------- */
+/* ---------- 低功耗：8s 无操作休眠，PA0/AW9523 INT 唤醒（非冷上电，不走乐器选择） ---------- */
 #define PIANO_KB_IDLE_SLEEP_EN        1
-#define PIANO_KB_IDLE_SLEEP_MS        15000
+#define PIANO_KB_IDLE_SLEEP_MS        8000
 
 #endif /* __PIANO_KEYBOARD_CONFIG_H__ */
