@@ -94,14 +94,11 @@ typedef enum {
 #define PIANO_KB_RUNTIME_ADJ_EN       0
 
 /*
- * 抬起延长音：松键后仍满音量保持，延时后再 NoteOff（只调这个，不影响下面按住衰减）
- * 按住衰减：解码器 CMD_MIDI_CTRL_TEMPO.decay_val 高 5bit×约10ms，与松键延时无关
+ * 抬起延长音：松键后仍满音量保持，延时后再 NoteOff（与 SDK note_off time 无关）
  */
 #define PIANO_NOTE_RELEASE_MS         150
-#define PIANO_NOTE_HOLD_DECAY_MS        400
 /* tick_timer 下 jiffies 约 10ms 递增一次（同 delay_10ms） */
 #define PIANO_NOTE_RELEASE_JIF        ((PIANO_NOTE_RELEASE_MS + 9) / 10)
-#define PIANO_NOTE_HOLD_DECAY_IDX     ((PIANO_NOTE_HOLD_DECAY_MS + 9) / 10)
 
 /* ---------- 内置音乐演奏模式（下排 key6 上电进入；演奏中再按 key6 退出） ---------- */
 #define PIANO_KB_PERF_MODE_EN         1

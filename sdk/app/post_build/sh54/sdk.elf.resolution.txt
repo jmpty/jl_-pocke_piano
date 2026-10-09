@@ -1608,6 +1608,7 @@ obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,aw9523_sleep_enter,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,vm_pre_erase,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,sys_idle_deal,l
+-r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,decoder_stop_now,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,uart_init,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,aw9523_resume,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,midi_key_board_function_switch,pl

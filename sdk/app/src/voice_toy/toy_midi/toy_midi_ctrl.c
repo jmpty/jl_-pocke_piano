@@ -500,23 +500,6 @@ static void piano_kb_decoder_apply_cfg(void)
                                      &midi_key_board_function_switch);
     }
 
-    {
-        MIDI_PLAY_CTRL_TEMPO tempo;
-        u8 ci;
-        u16 decay_idx;
-
-        decay_idx = PIANO_NOTE_HOLD_DECAY_IDX;
-        if (decay_idx > 31) {
-            decay_idx = 31;
-        }
-        tempo.tempo_val = 1042;
-        tempo.mute_threshold = (u32)1L << 29;
-        for (ci = 0; ci < CTRL_CHANNEL_NUM; ci++) {
-            tempo.decay_val[ci] = (u16)((decay_idx << 11) | 1024);
-        }
-        toy_midi_ctrl_dec_config_api(midi_keyboard_obj, CMD_MIDI_CTRL_TEMPO, &tempo);
-    }
-
     midi_on_off_callback_init(midi_keyboard_obj,
                               midi_ctrl_melody_trigger,
                               midi_ctrl_melody_stop_trigger);
@@ -543,6 +526,15 @@ static void piano_kb_decoder_stop(void)
     if (midi_keyboard_obj) {
         piano_all_note_off();
         decoder_stop(midi_keyboard_obj, NEED_WAIT);
+        midi_keyboard_obj = NULL;
+    }
+}
+
+/* 进深睡前用 NO_WAIT，避免 decoder_stop 等 DAC 时 misalign 异常 */
+static void piano_kb_decoder_sleep_stop(void)
+{
+    if (midi_keyboard_obj) {
+        decoder_stop_now(midi_keyboard_obj);
         midi_keyboard_obj = NULL;
     }
 }
@@ -1028,6 +1020,18 @@ static void piano_kb_idle_reset(void)
     piano_idle_500ms_cnt = 0;
 }
 
+static u8 piano_kb_has_pending_release(void)
+{
+    u8 i;
+
+    for (i = 0; i < AW9523_KEY_NUM; i++) {
+        if (piano_key_release_jif[i] != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static u8 piano_kb_can_sleep(void)
 {
     if (!piano_aw9523_ok) {
@@ -1039,6 +1043,9 @@ static u8 piano_kb_can_sleep(void)
     }
 #endif
     if (midi_keyboard_idle_cnt) {
+        return 0;
+    }
+    if (piano_kb_has_pending_release()) {
         return 0;
     }
     if (piano_stable_port != AW9523_KEY_IDLE_PORT) {
@@ -1131,15 +1138,18 @@ static void piano_kb_wake_resume(void)
 static void piano_enter_sleep(void)
 {
     log_info("sleep enter\n");
+    piano_key_release_poll();
     piano_all_note_off();
 #if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
     if (piano_perf_mode) {
         piano_perf_mode = 0;
         piano_perf_stop();
     }
-    piano_perf_unmount();
+    if (piano_perf_mounted) {
+        piano_perf_unmount();
+    }
 #endif
-    piano_kb_decoder_stop();
+    piano_kb_decoder_sleep_stop();
     aw9523_sleep_enter();
     vm_pre_erase();
     sys_idle_deal(-2);
