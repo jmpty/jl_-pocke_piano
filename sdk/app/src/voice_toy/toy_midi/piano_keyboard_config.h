@@ -93,13 +93,32 @@ typedef enum {
 
 #define PIANO_KB_RUNTIME_ADJ_EN       0
 
-/* ---------- 内置音乐演奏模式（下排 key6 切换） ---------- */
+/*
+ * 抬起延长音：松键后仍满音量保持，延时后再 NoteOff（只调这个，不影响下面按住衰减）
+ * 按住衰减：解码器 CMD_MIDI_CTRL_TEMPO.decay_val 高 5bit×约10ms，与松键延时无关
+ */
+#define PIANO_NOTE_RELEASE_MS         150
+#define PIANO_NOTE_HOLD_DECAY_MS        400
+/* tick_timer 下 jiffies 约 10ms 递增一次（同 delay_10ms） */
+#define PIANO_NOTE_RELEASE_JIF        ((PIANO_NOTE_RELEASE_MS + 9) / 10)
+#define PIANO_NOTE_HOLD_DECAY_IDX     ((PIANO_NOTE_HOLD_DECAY_MS + 9) / 10)
+
+/* ---------- 内置音乐演奏模式（下排 key6 上电进入；演奏中再按 key6 退出） ---------- */
 #define PIANO_KB_PERF_MODE_EN         1
 #define PIANO_KB_PERF_MODE_KEY        6
 #define PIANO_KB_PERF_DEFAULT_SONG      1
+/*
+ * 演奏模式：播放 Flash 里 SDK 示例语音（F1A/F1B/UMP3，非 MIDI）
+ *   曲1~3 dir_song  曲4~6 dir_eng  曲7~8 dir_story  曲9~13 dir_poetry
+ * 选曲：除 key6 外 key0->曲1、key1->曲2…；key6 退出演奏模式
+ * 音量：key3 音量+、key4 音量-（6 挡，掉电保存）
+ */
 
-/* ---------- 低功耗：8s 无操作休眠，PA0/AW9523 INT 唤醒（非冷上电，不走乐器选择） ---------- */
+/*
+ * 低功耗：平时全速轮询；连续空闲 PIANO_KB_IDLE_SLEEP_MS 后进入深睡一次。
+ * PA0/AW9523 INT 唤醒后播放当前按住键；冷上电仍走乐器/移调/音量选择，不变。
+ */
 #define PIANO_KB_IDLE_SLEEP_EN        1
-#define PIANO_KB_IDLE_SLEEP_MS        8000
+#define PIANO_KB_IDLE_SLEEP_MS        15000
 
 #endif /* __PIANO_KEYBOARD_CONFIG_H__ */

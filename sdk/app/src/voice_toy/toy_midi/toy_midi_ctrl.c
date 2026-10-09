@@ -27,10 +27,9 @@
 #if TCFG_PC_ENABLE
 #include "usb/otg.h"
 #endif
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
 #include "simple_play_file.h"
 #include "device_mge.h"
-#include "midi_api.h"
 #endif
 
 #if defined(DECODER_MIDI_KEYBOARD_EN) && (DECODER_MIDI_KEYBOARD_EN)
@@ -92,6 +91,7 @@ static u8 piano_aw9523_ok;
 static u16 piano_stable_port;
 static u16 piano_boot_port_snap;    /* 上电瞬间按键快照，须在 decoder 初始化前采集 */
 static u32 piano_scan_jif;
+static u32 piano_key_release_jif[AW9523_KEY_NUM]; /* 0=无待关断；非0=松键时刻 jiffies */
 #if PIANO_KB_BOOT_KEY_SEL_EN
 static const u8 piano_kb_boot_instr_top_key[] = PIANO_KB_BOOT_INSTR_TOP_KEY_TABLE;
 static const u8 piano_kb_boot_instr_bot_key[] = PIANO_KB_BOOT_INSTR_BOT_KEY_TABLE;
@@ -104,6 +104,7 @@ typedef struct {
     s8  pitch;
     u8  vol[PIANO_KB_BOOT_INSTR_NUM];
     u8  last_instr;
+    u8  perf_vol;     /* 演奏模式 DAC 音量挡位 */
 } piano_kb_vm_t;
 
 static piano_kb_vm_t piano_kb_vm;
@@ -118,14 +119,33 @@ static u8 piano_long_done[AW9523_KEY_NUM];
 #if PIANO_KB_IDLE_SLEEP_EN
 static u16 piano_idle_500ms_cnt;
 #endif
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
 static play_control piano_perf_pctl          AT(.midi_ctrl_buf);
 static u8 piano_perf_mode;
 static u8 piano_perf_findex = PIANO_KB_PERF_DEFAULT_SONG;
+static u8 piano_perf_vol_level = PIANO_KB_VOL_LEVEL_DEF;
 static u8 piano_perf_mounted;
+
+typedef struct {
+    u8 dir_idx;
+    u8 findex;
+} piano_perf_track_t;
+
 static const char *const piano_perf_dir_tab[] = {
-    "/dir_midi",
+    "/dir_song",
+    "/dir_eng",
+    "/dir_poetry",
+    "/dir_story",
 };
+
+/* 示例资源：dir_song×3 + dir_eng×3 + dir_story×2 + dir_poetry×5 = 13 曲 */
+static const piano_perf_track_t piano_perf_track_tab[] = {
+    {0, 1}, {0, 2}, {0, 3},
+    {1, 1}, {1, 2}, {1, 3},
+    {3, 1}, {3, 2},
+    {2, 1}, {2, 2}, {2, 3}, {2, 4}, {2, 5},
+};
+#define PIANO_KB_PERF_TRACK_NUM  ((u8)(sizeof(piano_perf_track_tab) / sizeof(piano_perf_track_tab[0])))
 #endif
 
 static u32 midi_ctrl_melody_trigger(void *priv, u8 key, u8 vel);
@@ -155,13 +175,13 @@ static u32 toy_midi_ctrl_note_on(dec_obj *obj, u8 nkey, u8 nvel, u8 chn)
     return midi_ctrl_note_on(work_buf, nkey, nvel, chn);
 }
 
-static u32 toy_midi_ctrl_note_off(dec_obj *obj, u8 nkey, u8 nvel, u16 decay_time)
+static u32 toy_midi_ctrl_note_off(dec_obj *obj, u8 nkey, u8 chn, u16 decay_time)
 {
     if (NULL == obj) {
         return -1;
     }
     void *work_buf = obj->p_dbuf;
-    return midi_ctrl_note_off(work_buf, nkey, nvel, decay_time);
+    return midi_ctrl_note_off(work_buf, nkey, chn, decay_time);
 }
 
 static u32 toy_midi_ctrl_vel_vibrate(dec_obj *obj, u8 nkey, u8 vel_step, u8 vel_rate, u8 chn)
@@ -211,17 +231,52 @@ static u8 piano_note_get(u8 key)
     return (u8)sum;
 }
 
-static void piano_note_on(u8 key)
+static void piano_note_off_immediate(u8 key)
 {
     if (key >= AW9523_KEY_NUM) {
         return;
     }
+    piano_key_release_jif[key] = 0;
+    if (midi_keyboard_obj) {
+        toy_midi_ctrl_note_off(midi_keyboard_obj,
+                               piano_note_get(key),
+                               PIANO_INSTR_CHN, 0);
+    }
+}
+
+static void piano_key_release_poll(void)
+{
+    u8 i;
+
+#if PIANO_NOTE_RELEASE_MS == 0
+    return;
+#endif
+    for (i = 0; i < AW9523_KEY_NUM; i++) {
+        if (piano_key_release_jif[i] == 0) {
+            continue;
+        }
+        if ((u32)(jiffies - piano_key_release_jif[i]) < PIANO_NOTE_RELEASE_JIF) {
+            continue;
+        }
+        piano_note_off_immediate(i);
+    }
+}
+
+static void piano_note_on(u8 key)
+{
+    u8 note;
+
+    if (key >= AW9523_KEY_NUM) {
+        return;
+    }
+    piano_key_release_jif[key] = 0;
     if (midi_keyboard_obj) {
         midi_keyboard_obj->sound.enable &= ~B_DEC_PAUSE;
     }
-    toy_midi_ctrl_note_on(midi_keyboard_obj,
-                          piano_note_get(key),
-                          PIANO_NOTE_VEL, PIANO_INSTR_CHN);
+    note = piano_note_get(key);
+    /* 同键快速再按：先立即关断再触发，避免释音占配音源产生空档 */
+    toy_midi_ctrl_note_off(midi_keyboard_obj, note, PIANO_INSTR_CHN, 0);
+    toy_midi_ctrl_note_on(midi_keyboard_obj, note, PIANO_NOTE_VEL, PIANO_INSTR_CHN);
 }
 
 static void piano_note_off(u8 key)
@@ -229,9 +284,12 @@ static void piano_note_off(u8 key)
     if (key >= AW9523_KEY_NUM) {
         return;
     }
-    toy_midi_ctrl_note_off(midi_keyboard_obj,
-                           piano_note_get(key),
-                           PIANO_INSTR_CHN, 0);
+#if PIANO_NOTE_RELEASE_MS == 0
+    piano_note_off_immediate(key);
+#else
+    /* SDK 的 note_off(time) 会改变按住时的衰减，不是松手尾音；延后再发 NoteOff */
+    piano_key_release_jif[key] = jiffies;
+#endif
 }
 
 static void piano_all_note_off(void)
@@ -240,7 +298,7 @@ static void piano_all_note_off(void)
 
     for (i = 0; i < AW9523_KEY_NUM; i++) {
         if ((piano_stable_port & BIT(i)) == 0) {
-            piano_note_off(i);
+            piano_note_off_immediate(i);
         }
     }
 }
@@ -309,6 +367,7 @@ static void piano_kb_vm_default(void)
     for (i = 0; i < PIANO_KB_BOOT_INSTR_NUM; i++) {
         piano_kb_vm.vol[i] = PIANO_KB_VOL_LEVEL_DEF;
     }
+    piano_kb_vm.perf_vol = PIANO_KB_VOL_LEVEL_DEF;
 }
 
 static u32 piano_kb_eeprom_data_addr(void)
@@ -392,6 +451,7 @@ static void piano_kb_vm_load(void)
     for (i = 0; i < PIANO_KB_BOOT_INSTR_NUM; i++) {
         tmp.vol[i] = piano_vol_level_clamp(tmp.vol[i]);
     }
+    tmp.perf_vol = piano_vol_level_clamp(tmp.perf_vol);
     piano_kb_vm = tmp;
 }
 
@@ -438,6 +498,23 @@ static void piano_kb_decoder_apply_cfg(void)
         midi_key_board_function_switch |= EX_VOL_ENABLE;
         toy_midi_ctrl_dec_config_api(midi_keyboard_obj, CMD_MIDI_SET_SWITCH,
                                      &midi_key_board_function_switch);
+    }
+
+    {
+        MIDI_PLAY_CTRL_TEMPO tempo;
+        u8 ci;
+        u16 decay_idx;
+
+        decay_idx = PIANO_NOTE_HOLD_DECAY_IDX;
+        if (decay_idx > 31) {
+            decay_idx = 31;
+        }
+        tempo.tempo_val = 1042;
+        tempo.mute_threshold = (u32)1L << 29;
+        for (ci = 0; ci < CTRL_CHANNEL_NUM; ci++) {
+            tempo.decay_val[ci] = (u16)((decay_idx << 11) | 1024);
+        }
+        toy_midi_ctrl_dec_config_api(midi_keyboard_obj, CMD_MIDI_CTRL_TEMPO, &tempo);
     }
 
     midi_on_off_callback_init(midi_keyboard_obj,
@@ -692,7 +769,63 @@ static void piano_key_hold_scan(u16 port)
 }
 #endif
 
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
+static void piano_perf_exit(void);
+static void piano_perf_stop(void);
+static void piano_perf_select_key(u8 key);
+
+static void piano_perf_apply_volume(void)
+{
+    u8 dac_level;
+
+    piano_perf_vol_level = piano_vol_level_clamp(piano_perf_vol_level);
+    dac_level = piano_vol_level_to_dac(piano_perf_vol_level);
+    dac_vol(0, dac_level);
+    log_info("perf vol lvl %d dac %d\n", piano_perf_vol_level, dac_level);
+}
+
+static void piano_perf_vol_change(s8 delta)
+{
+    u8 level = piano_perf_vol_level;
+
+#if PIANO_KB_VM_EN
+    level = piano_kb_vm.perf_vol;
+#endif
+    if (delta > 0) {
+        if (level < PIANO_KB_VOL_LEVEL_MAX) {
+            level++;
+        }
+    } else if (delta < 0) {
+        if (level > PIANO_KB_VOL_LEVEL_MIN) {
+            level--;
+        }
+    }
+    piano_perf_vol_level = level;
+#if PIANO_KB_VM_EN
+    piano_kb_vm.perf_vol = level;
+    piano_kb_vm_save();
+#endif
+    piano_perf_apply_volume();
+}
+
+static u8 piano_perf_handle_key(u8 key)
+{
+    if (key == PIANO_KB_BOOT_VOL_UP_KEY) {
+        piano_perf_vol_change(1);
+        return 1;
+    }
+    if (key == PIANO_KB_BOOT_VOL_DOWN_KEY) {
+        piano_perf_vol_change(-1);
+        return 1;
+    }
+    if (key == PIANO_KB_PERF_MODE_KEY) {
+        piano_perf_exit();
+        return 1;
+    }
+    piano_perf_select_key(key);
+    return 1;
+}
+
 static u8 piano_perf_key_to_findex(u8 key)
 {
     if (key >= AW9523_KEY_NUM || key == PIANO_KB_PERF_MODE_KEY) {
@@ -701,59 +834,64 @@ static u8 piano_perf_key_to_findex(u8 key)
     return (key < PIANO_KB_PERF_MODE_KEY) ? (u8)(key + 1) : key;
 }
 
-static u32 piano_perf_play_song(u8 findex)
+static u32 piano_perf_play_song(u8 track_idx)
 {
     u32 err;
+    const piano_perf_track_t *tr;
 
-    if (!piano_perf_mounted || findex == 0 || findex > piano_perf_pctl.ftotal) {
-        log_info("perf skip song %d total %d\n", findex, piano_perf_pctl.ftotal);
+    if (!piano_perf_mounted || track_idx == 0 || track_idx > PIANO_KB_PERF_TRACK_NUM) {
+        log_info("perf skip track %d\n", track_idx);
         return 1;
     }
+    tr = &piano_perf_track_tab[track_idx - 1];
     piano_kb_decoder_stop();
-    piano_perf_pctl.findex = findex;
-    piano_perf_findex = findex;
-    dac_vol(0, 31);
+    piano_perf_pctl.dir_index = tr->dir_idx;
+    piano_perf_pctl.findex = tr->findex;
+    piano_perf_findex = track_idx;
+    piano_perf_apply_volume();
     err = play_one_file(&piano_perf_pctl);
     if (err) {
-        log_info("perf play fail idx %d err 0x%x\n", findex, err);
+        log_info("perf play fail track %d dir %d idx %d err 0x%x\n",
+                 track_idx, tr->dir_idx, tr->findex, err);
     } else {
-        log_info("perf playing idx %d / %d\n", findex, piano_perf_pctl.ftotal);
+        log_info("perf playing track %d dir %s idx %d\n",
+                 track_idx, piano_perf_dir_tab[tr->dir_idx], tr->findex);
         kick_decoder();
     }
     return err;
 }
 
-static void piano_perf_refresh_ftotal(void)
+static u8 piano_perf_ensure_mount(void)
 {
-    void *pdir = NULL;
-
-    piano_perf_pctl.ftotal = 0;
-    if (!piano_perf_mounted) {
-        return;
+    if (piano_perf_mounted) {
+        return 1;
     }
-    if (0 == vfs_openbypath(piano_perf_pctl.pfs, &pdir, piano_perf_dir_tab[0])) {
-        vfs_ioctl(pdir, FS_IOCTL_DIR_FILE_TOTAL, (int)&piano_perf_pctl.ftotal);
-        vfs_file_close(&pdir);
-    }
-}
-
-static void piano_perf_init(void)
-{
     memset(&piano_perf_pctl, 0, sizeof(piano_perf_pctl));
     piano_perf_pctl.dev_index = INNER_FLASH_RO;
     piano_perf_pctl.findex = PIANO_KB_PERF_DEFAULT_SONG;
-    piano_perf_pctl.dec_type = BIT_MIDI;
+    piano_perf_pctl.dec_type = BIT_F1A1 | BIT_UMP3;
     piano_perf_pctl.pdir = (void *)&piano_perf_dir_tab[0];
     piano_perf_pctl.dir_total = sizeof(piano_perf_dir_tab) / sizeof(piano_perf_dir_tab[0]);
-    midi_decode_init();
     if (simple_dev_fs_mount(&piano_perf_pctl)) {
         piano_perf_mounted = 0;
         log_info("perf dir mount fail\n");
-        return;
+        return 0;
     }
     piano_perf_mounted = 1;
-    piano_perf_refresh_ftotal();
-    log_info("perf dir total %d\n", piano_perf_pctl.ftotal);
+#if PIANO_KB_VM_EN
+    piano_perf_vol_level = piano_vol_level_clamp(piano_kb_vm.perf_vol);
+#endif
+    log_info("perf tracks %d vol %d (f1a demo)\n", PIANO_KB_PERF_TRACK_NUM, piano_perf_vol_level);
+    return 1;
+}
+
+static void piano_perf_unmount(void)
+{
+    piano_perf_stop();
+    if (piano_perf_mounted) {
+        simple_dev_fs_close(&piano_perf_pctl);
+        piano_perf_mounted = 0;
+    }
 }
 
 static void piano_perf_stop(void)
@@ -772,12 +910,11 @@ static void piano_perf_enter(void)
 {
     u8 song = piano_perf_findex;
 
-    piano_perf_refresh_ftotal();
-    if (!piano_perf_mounted || piano_perf_pctl.ftotal == 0) {
-        log_info("perf enter fail, dir_midi empty or missing\n");
+    if (!piano_perf_ensure_mount() || PIANO_KB_PERF_TRACK_NUM == 0) {
+        log_info("perf enter fail, demo audio missing\n");
         return;
     }
-    if (song == 0 || song > piano_perf_pctl.ftotal) {
+    if (song == 0 || song > PIANO_KB_PERF_TRACK_NUM) {
         song = PIANO_KB_PERF_DEFAULT_SONG;
     }
     log_info("perf mode enter\n");
@@ -792,7 +929,7 @@ static void piano_perf_enter(void)
 static void piano_perf_exit(void)
 {
     piano_perf_mode = 0;
-    piano_perf_stop();
+    piano_perf_unmount();
     piano_kb_decoder_start();
     log_info("perf mode exit\n");
 }
@@ -853,13 +990,10 @@ static void piano_perf_select_key(u8 key)
 static void piano_perf_cleanup(void)
 {
     if (piano_perf_mode) {
-        piano_perf_exit();
+        piano_perf_mode = 0;
+        piano_perf_stop();
     }
-    if (piano_perf_mounted) {
-        decoder_stop(piano_perf_pctl.p_dec_obj, NEED_WAIT);
-        simple_dev_fs_close(&piano_perf_pctl);
-        piano_perf_mounted = 0;
-    }
+    piano_perf_unmount();
 }
 #endif
 
@@ -910,7 +1044,7 @@ static u8 piano_kb_can_sleep(void)
     if (piano_stable_port != AW9523_KEY_IDLE_PORT) {
         return 0;
     }
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
     if (piano_perf_mode && piano_perf_pctl.p_dec_obj &&
         (MUSIC_PLAY == get_decoder_status(piano_perf_pctl.p_dec_obj))) {
         return 0;
@@ -958,17 +1092,13 @@ static void piano_kb_wake_key_play(void)
 
     log_info("wake key play port 0x%x pressed 0x%x\n", port, pressed);
 
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
     if (piano_perf_mode) {
         for (i = 0; i < AW9523_KEY_NUM; i++) {
             if (0 == (pressed & BIT(i))) {
                 continue;
             }
-            if (i == PIANO_KB_PERF_MODE_KEY) {
-                piano_perf_exit();
-                break;
-            }
-            piano_perf_select_key(i);
+            piano_perf_handle_key(i);
         }
         piano_stable_port = port;
         piano_scan_jif = jiffies;
@@ -1002,10 +1132,12 @@ static void piano_enter_sleep(void)
 {
     log_info("sleep enter\n");
     piano_all_note_off();
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
     if (piano_perf_mode) {
+        piano_perf_mode = 0;
         piano_perf_stop();
     }
+    piano_perf_unmount();
 #endif
     piano_kb_decoder_stop();
     aw9523_sleep_enter();
@@ -1039,6 +1171,8 @@ static void piano_key_scan(void)
         return;
     }
 
+    piano_key_release_poll();
+
 #if PIANO_KB_RUNTIME_ADJ_EN
     piano_key_hold_scan(port);
 #endif
@@ -1062,19 +1196,15 @@ static void piano_key_scan(void)
                 continue;
             }
 #endif
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
             if (piano_perf_mode) {
-                if (i == PIANO_KB_PERF_MODE_KEY) {
-                    piano_perf_exit();
-                    continue;
-                }
-                piano_perf_select_key(i);
+                piano_perf_handle_key(i);
                 continue;
             }
 #endif
             piano_note_on(i);
         } else {
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
             if (piano_perf_mode) {
                 continue;
             }
@@ -1123,8 +1253,7 @@ void toy_midi_keyboard_app(void)
     if (piano_aw9523_ok) {
         piano_key_baseline_sync();
     }
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
-    piano_perf_init();
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
 #if PIANO_KB_BOOT_KEY_SEL_EN
     piano_boot_perf_apply();
 #endif
@@ -1181,11 +1310,12 @@ __midikeypitch_bend:
             toy_midi_ctrl_pitch_bend(midi_keyboard_obj, pitch_val, cur_channal);
             break;
 
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
-        case MSG_MIDI_FILE_END:
-        case MSG_MIDI_FILE_ERR:
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
+        case MSG_F1A1_FILE_END:
+        case MSG_F1A1_FILE_ERR:
+        case MSG_F1A1_LOOP:
             if (piano_perf_mode) {
-                log_info("perf file end, replay idx %d\n", piano_perf_findex);
+                log_info("perf file end, replay track %d\n", piano_perf_findex);
                 decoder_stop(piano_perf_pctl.p_dec_obj, NEED_WAIT);
                 piano_perf_pctl.p_dec_obj = NULL;
                 piano_perf_play_song(piano_perf_findex);
@@ -1213,7 +1343,7 @@ __midikeypitch_bend:
         }
     }
 __midi_decode_app_exit:
-#if PIANO_KB_PERF_MODE_EN && defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
     piano_perf_cleanup();
 #endif
     piano_kb_decoder_stop();

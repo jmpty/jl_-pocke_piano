@@ -1594,13 +1594,11 @@ obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,norflash_set_write_protect,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,dev_ioctl,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,dev_byte_write,l
--r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,midi_decode_init,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,simple_dev_fs_mount,l
--r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,vfs_openbypath,l
--r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,vfs_ioctl,l
--r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,vfs_file_close,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,wdt_clear,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,aw9523_read_port,l
+-r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,simple_dev_fs_close,l
+-r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,vfs_file_close,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,midi_ctrl_note_on,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,midi_ctrl_note_off,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,midi_ctrl_pitch_bend,l
@@ -1612,7 +1610,6 @@ obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,sys_idle_deal,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,uart_init,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,aw9523_resume,l
--r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,simple_dev_fs_close,l
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,midi_key_board_function_switch,pl
 -r=obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl.o,jiffies,l
 obj/Release/app/src/voice_toy/toy_midi/toy_midi_ctrl_key.o

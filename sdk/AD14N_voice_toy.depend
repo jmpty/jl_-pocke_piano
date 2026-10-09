@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1789864776 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\aw9523\aw9523.c
+1790000526 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\aw9523\aw9523.c
 	"aw9523.h"
 	"iic_soft.h"
 	"gpio.h"
@@ -1634,7 +1634,7 @@
 	"dac_api.h"
 	"log.h"
 
-1789866747 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi_ctrl.c
+1791546464 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi_ctrl.c
 	"toy_midi_ctrl.h"
 	"piano_keyboard_config.h"
 	"app_config.h"
@@ -1660,10 +1660,10 @@
 	"string.h"
 	"dac_api.h"
 	"wdt.h"
+	"jiffies.h"
 	"usb/otg.h"
 	"simple_play_file.h"
 	"device_mge.h"
-	"midi_api.h"
 	"log.h"
 
 1788052647 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\midi_prog.h
@@ -1797,7 +1797,7 @@
 	"msg.h"
 	"app_config.h"
 
-1789866077 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\piano_keyboard_config.h
+1791546463 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\piano_keyboard_config.h
 	"midi_prog.h"
 
 1789863632 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\norflash\sfc_udisk.c
