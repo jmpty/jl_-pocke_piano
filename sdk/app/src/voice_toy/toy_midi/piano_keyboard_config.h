@@ -11,7 +11,7 @@
  *   下排 key7/key5：选乐器 8~9
  *   下排 key6：按住上电进入内置音乐演奏模式（可同时按其他键选起始曲目）；
  *              正常运行时仅在演奏模式中按 key6 退出，不能进入演奏模式
- *   下排最左 key13：移调 -1 半音；次左 key12：移调 +1 半音
+ *   下排最左 key13：移调降一个八度；次左 key12：移调升一个八度（每次上电按一次）
  *   下排右二 key4：当前乐器音量降 1 挡；最右 key3：音量升 1 挡
  */
 
@@ -38,7 +38,7 @@ typedef enum {
 typedef enum {
     PIANO_KB_INSTR_PIANO       = 0,
     PIANO_KB_INSTR_FLUTE       = 1,
-    PIANO_KB_INSTR_GUITAR      = 2,
+    PIANO_KB_INSTR_DRUMS       = 2,   /* 乐器3：架子鼓演奏（GM 鼓键位，非旋律音高） */
     PIANO_KB_INSTR_VIOLIN      = 3,
     PIANO_KB_INSTR_TRUMPET     = 4,
     PIANO_KB_INSTR_SAX         = 5,
@@ -56,7 +56,7 @@ typedef enum {
 #define PIANO_KB_INSTR_PROG_TABLE { \
     MIDI_PROG_ACOUSTIC_GRAND_PIANO, \
     MIDI_PROG_FLUTE_PIPE, \
-    MIDI_PROG_NYLON_ACOUSTIC_GUITAR, \
+    MIDI_PROG_PERCUSSION_STANDARD, \
     MIDI_PROG_VIOLIN_SOLO_STRINGS, \
     MIDI_PROG_TRUMPET_BRASS, \
     MIDI_PROG_ALTO_SAX_REED, \
@@ -66,8 +66,40 @@ typedef enum {
 }
 
 #define PIANO_KB_INSTR_NAME_TABLE { \
-    "Piano", "Flute", "Guitar", "Violin", "Trumpet", \
+    "Piano", "Flute", "DrumKit", "Violin", "Trumpet", \
     "Sax", "Harmonica", "MusicBox", "Organ", \
+}
+
+/*
+ * 乐器3（上电按 key10）：架子鼓演奏 — 只发 GM 鼓音符 35~57，移调无效，不按旋律音高弹。
+ * 全键共用一套鼓组 prog，每键不同鼓件（底鼓/军鼓/嗵鼓/镲），不是 9 种旋律乐器之一。
+ */
+#define PIANO_KB_DRUM_MIDI_CHN          0   /* AD14N MIDI 琴与旋律同通道；靠 prog128+鼓键位 */
+#define PIANO_KB_DRUM_KIT_PROG          MIDI_PROG_PERCUSSION_STANDARD
+/* key8 锣：标准鼓组 GM52 在 MIDI_CTRL.mda 里常无采样，改用旋律打击「反转镲」 */
+#define PIANO_KB_DRUM_GONG_KEY          8
+#define PIANO_KB_DRUM_GONG_PROG         MIDI_PROG_REVERSE_CYMBAL_PERCUSSIVE
+#define PIANO_KB_DRUM_GONG_NOTE         76
+/*
+ * GM 鼓键位；按琴体方位排（库乐队打击乐：上排偏镲/角上沙锤，下排鼓身+踩镲）
+ * 上排左→右 key8,key9,key10,key11,key0,key1,key2
+ * 下排左→右 key13,key12,key4,key5,key6,key7,key3
+ */
+#define PIANO_KB_DRUM_NOTE_TABLE { \
+    49,  /* key0  上排 Crash1 碎音镲 */ \
+    54,  /* key1  上排 Tambourine 铃鼓 */ \
+    55,  /* key2  上排 Splash 溅音镲 */ \
+    46,  /* key3  下排最右 Open Hi-Hat */ \
+    42,  /* key4  Closed Hi-Hat */ \
+    50,  /* key5  High Tom 高音嗵 */ \
+    44,  /* key6  Hi-Hat Pedal 踩镲踏板 */ \
+    47,  /* key7  Low-Mid Tom 中音嗵 */ \
+    52,  /* key8  上排最左 China/锣 GM52 延音最长（库乐队左上） */ \
+    38,  /* key9  Snare 军鼓 */ \
+    51,  /* key10 Ride Cymbal 叮叮镲 */ \
+    48,  /* key11 Hi-Mid Tom */ \
+    43,  /* key12 Floor Tom 落地嗵 */ \
+    36,  /* key13 下排最左 Bass Drum 大鼓/底鼓 */ \
 }
 
 /* ---------- 上电按键（按住上电） ---------- */
@@ -83,7 +115,7 @@ typedef enum {
 #define PIANO_KB_BOOT_PITCH_UP_KEY    12
 #define PIANO_KB_BOOT_VOL_DOWN_KEY    4
 #define PIANO_KB_BOOT_VOL_UP_KEY      3
-#define PIANO_KB_BOOT_PITCH_STEP      1    /* 半音 */
+#define PIANO_KB_BOOT_PITCH_STEP      12   /* 半音，12=一个八度 */
 
 /* 音量 6 挡：2~7 挡，每乐器独立保存 */
 #define PIANO_KB_VOL_LEVEL_MIN        2
@@ -94,11 +126,20 @@ typedef enum {
 #define PIANO_KB_RUNTIME_ADJ_EN       0
 
 /*
- * 抬起延长音：松键后仍满音量保持，延时后再 NoteOff（与 SDK note_off time 无关）
+ * 旋律抬起延长音：松键后仍 NoteOn，到期再 NoteOff(decay=0 走音色自带衰减)
  */
 #define PIANO_NOTE_RELEASE_MS         150
-/* tick_timer 下 jiffies 约 10ms 递增一次（同 delay_10ms） */
-#define PIANO_NOTE_RELEASE_JIF        ((PIANO_NOTE_RELEASE_MS + 9) / 10)
+/* 与 tick 约 10ms 一档一致（勿用 msecs_to_jiffies，本工程未链接 jiffies_unit） */
+#define PIANO_MS_TO_JIF(ms)           (((ms) + 9) / 10)
+#define PIANO_NOTE_RELEASE_JIF        PIANO_MS_TO_JIF(PIANO_NOTE_RELEASE_MS)
+
+/*
+ * 鼓延音（杰理 SDK）：
+ *   CMD_MIDI_CTRL_TEMPO → decay_val[]（不可 CMD_INIT_CONFIG，会冲掉琴 spi_pos）
+ *   midi_ctrl_note_off(..., decay_ms) → 衰减毫秒（MIDI_CTRL_API.h）
+ */
+#define PIANO_DRUM_DECAY_MS             2500
+#define PIANO_DRUM_DECAY_VAL            (((u16)31 << 11) | 2047)
 
 /* ---------- 内置音乐演奏模式（下排 key6 上电进入；演奏中再按 key6 退出） ---------- */
 #define PIANO_KB_PERF_MODE_EN         1
@@ -116,6 +157,6 @@ typedef enum {
  * PA0/AW9523 INT 唤醒后播放当前按住键；冷上电仍走乐器/移调/音量选择，不变。
  */
 #define PIANO_KB_IDLE_SLEEP_EN        1
-#define PIANO_KB_IDLE_SLEEP_MS        15000
+#define PIANO_KB_IDLE_SLEEP_MS        5000
 
 #endif /* __PIANO_KEYBOARD_CONFIG_H__ */

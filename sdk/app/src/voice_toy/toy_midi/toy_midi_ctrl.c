@@ -86,6 +86,77 @@ int midi_key_board_function_switch  AT(.midi_ctrl_buf);
 
 static s8 piano_pitch_offset;       /* 半音移调 */
 static u8 piano_cur_instr;
+
+static const u8 piano_drum_note_tab[AW9523_KEY_NUM] = PIANO_KB_DRUM_NOTE_TABLE;
+
+static u8 piano_kb_is_drums(void)
+{
+    return piano_cur_instr == PIANO_KB_INSTR_DRUMS;
+}
+
+static u8 piano_kb_midi_chn(void)
+{
+    return piano_kb_is_drums() ? (u8)PIANO_KB_DRUM_MIDI_CHN : (u8)PIANO_INSTR_CHN;
+}
+
+static u32 toy_midi_ctrl_set_prog(dec_obj *obj, u8 prog, u8 chn);
+static u32 toy_midi_ctrl_dec_config_api(dec_obj *obj, u32 cmd, void *parm);
+
+/*
+ * 琴路 open() 已带 spi_pos，不可再 CMD_INIT_CONFIG（会清空音色库导致全无声）。
+ * 仅 CMD_MIDI_CTRL_TEMPO 改 decay_val，鼓模式用 PIANO_DRUM_DECAY_VAL。
+ */
+static void piano_kb_midi_tempo_decay_apply(void)
+{
+    MIDI_PLAY_CTRL_TEMPO tempo;
+    u8 i;
+
+    if (!midi_keyboard_obj) {
+        return;
+    }
+    tempo.tempo_val = 1042;
+    tempo.mute_threshold = (u32)((u16)1L << 29);
+    for (i = 0; i < CTRL_CHANNEL_NUM; i++) {
+        tempo.decay_val[i] = piano_kb_is_drums() ?
+                             (u16)PIANO_DRUM_DECAY_VAL :
+                             (u16)(((u16)31 << 11) | 1024);
+    }
+    toy_midi_ctrl_dec_config_api(midi_keyboard_obj, CMD_MIDI_CTRL_TEMPO, &tempo);
+}
+
+static void piano_kb_drum_kit_apply(void)
+{
+    if (!midi_keyboard_obj) {
+        return;
+    }
+    toy_midi_ctrl_set_prog(midi_keyboard_obj, PIANO_KB_DRUM_KIT_PROG, PIANO_KB_DRUM_MIDI_CHN);
+}
+
+static u8 piano_kb_drum_is_gong_key(u8 key)
+{
+    return key == PIANO_KB_DRUM_GONG_KEY;
+}
+
+static u8 piano_kb_drum_note_for_key(u8 key)
+{
+    if (piano_kb_drum_is_gong_key(key)) {
+        return (u8)PIANO_KB_DRUM_GONG_NOTE;
+    }
+    return piano_drum_note_tab[key];
+}
+
+static void piano_kb_drum_voice_prepare(u8 key)
+{
+    if (!midi_keyboard_obj || !piano_kb_is_drums()) {
+        return;
+    }
+    if (piano_kb_drum_is_gong_key(key)) {
+        toy_midi_ctrl_set_prog(midi_keyboard_obj, PIANO_KB_DRUM_GONG_PROG,
+                               piano_kb_midi_chn());
+    } else {
+        piano_kb_drum_kit_apply();
+    }
+}
 static u8 piano_cur_vol_level = PIANO_KB_VOL_LEVEL_DEF;
 static u8 piano_aw9523_ok;
 static u16 piano_stable_port;
@@ -212,6 +283,9 @@ static u32 toy_midi_ctrl_dec_config_api(dec_obj *obj, u32 cmd, void *parm)
     return ops->dec_confing(work_buf, cmd, parm);
 }
 
+static void piano_note_on(u8 key);
+static void piano_note_off(u8 key);
+
 static u8 piano_note_get(u8 key)
 {
     u8 note;
@@ -219,6 +293,9 @@ static u8 piano_note_get(u8 key)
 
     if (key >= AW9523_KEY_NUM) {
         return 60;
+    }
+    if (piano_kb_is_drums()) {
+        return piano_kb_drum_note_for_key(key);
     }
     note = piano_note_tab[key];
     sum = (int)note + (int)piano_pitch_offset;
@@ -231,31 +308,66 @@ static u8 piano_note_get(u8 key)
     return (u8)sum;
 }
 
-static void piano_note_off_immediate(u8 key)
+static void piano_note_off_send(u8 key, u16 decay_ms)
 {
     if (key >= AW9523_KEY_NUM) {
         return;
     }
     piano_key_release_jif[key] = 0;
     if (midi_keyboard_obj) {
+        if (piano_kb_is_drums()) {
+            piano_kb_drum_voice_prepare(key);
+        }
         toy_midi_ctrl_note_off(midi_keyboard_obj,
                                piano_note_get(key),
-                               PIANO_INSTR_CHN, 0);
+                               piano_kb_midi_chn(),
+                               decay_ms);
     }
+}
+
+/* 旋律松键后再 NoteOff(0)；鼓组用 SDK note_off(decay_ms) */
+static void piano_note_off_immediate(u8 key)
+{
+    u16 decay = 0;
+
+    if (piano_kb_is_drums()) {
+        decay = (u16)PIANO_DRUM_DECAY_MS;
+    }
+    piano_note_off_send(key, decay);
+}
+
+static void piano_note_off_cut(u8 key)
+{
+    piano_note_off_send(key, 0);
+}
+
+static u32 piano_key_release_hold_jif(u8 key)
+{
+    if (piano_kb_is_drums()) {
+        return 0;
+    }
+#if PIANO_NOTE_RELEASE_MS == 0
+    return 0;
+#else
+    return (u32)PIANO_NOTE_RELEASE_JIF;
+#endif
 }
 
 static void piano_key_release_poll(void)
 {
     u8 i;
 
-#if PIANO_NOTE_RELEASE_MS == 0
-    return;
-#endif
     for (i = 0; i < AW9523_KEY_NUM; i++) {
+        u32 hold_jif;
+
         if (piano_key_release_jif[i] == 0) {
             continue;
         }
-        if ((u32)(jiffies - piano_key_release_jif[i]) < PIANO_NOTE_RELEASE_JIF) {
+        hold_jif = piano_key_release_hold_jif(i);
+        if (hold_jif == 0) {
+            continue;
+        }
+        if ((u32)(jiffies - piano_key_release_jif[i]) < hold_jif) {
             continue;
         }
         piano_note_off_immediate(i);
@@ -265,6 +377,7 @@ static void piano_key_release_poll(void)
 static void piano_note_on(u8 key)
 {
     u8 note;
+    u8 chn;
 
     if (key >= AW9523_KEY_NUM) {
         return;
@@ -273,10 +386,14 @@ static void piano_note_on(u8 key)
     if (midi_keyboard_obj) {
         midi_keyboard_obj->sound.enable &= ~B_DEC_PAUSE;
     }
+    if (piano_kb_is_drums()) {
+        piano_kb_drum_voice_prepare(key);
+    }
     note = piano_note_get(key);
+    chn = piano_kb_midi_chn();
     /* 同键快速再按：先立即关断再触发，避免释音占配音源产生空档 */
-    toy_midi_ctrl_note_off(midi_keyboard_obj, note, PIANO_INSTR_CHN, 0);
-    toy_midi_ctrl_note_on(midi_keyboard_obj, note, PIANO_NOTE_VEL, PIANO_INSTR_CHN);
+    piano_note_off_cut(key);
+    toy_midi_ctrl_note_on(midi_keyboard_obj, note, PIANO_NOTE_VEL, chn);
 }
 
 static void piano_note_off(u8 key)
@@ -284,12 +401,12 @@ static void piano_note_off(u8 key)
     if (key >= AW9523_KEY_NUM) {
         return;
     }
-#if PIANO_NOTE_RELEASE_MS == 0
-    piano_note_off_immediate(key);
-#else
-    /* SDK 的 note_off(time) 会改变按住时的衰减，不是松手尾音；延后再发 NoteOff */
-    piano_key_release_jif[key] = jiffies;
-#endif
+    if (piano_key_release_hold_jif(key) != 0) {
+        /* 松键后仍 NoteOn(HOLD)，到期 NoteOff(鼓带 DECAY / 旋律 decay=0) */
+        piano_key_release_jif[key] = jiffies;
+    } else {
+        piano_note_off_immediate(key);
+    }
 }
 
 static void piano_all_note_off(void)
@@ -298,7 +415,7 @@ static void piano_all_note_off(void)
 
     for (i = 0; i < AW9523_KEY_NUM; i++) {
         if ((piano_stable_port & BIT(i)) == 0) {
-            piano_note_off_immediate(i);
+            piano_note_off_cut(i);
         }
     }
 }
@@ -310,13 +427,22 @@ static void piano_set_instr(u8 index)
     }
     piano_cur_instr = index;
     piano_all_note_off();
-    toy_midi_ctrl_set_prog(midi_keyboard_obj, piano_kb_instr_prog[piano_cur_instr], PIANO_INSTR_CHN);
-    log_info("instr %s prog %d\n", piano_kb_instr_name[piano_cur_instr],
-             piano_kb_instr_prog[piano_cur_instr]);
+    if (piano_kb_is_drums()) {
+        piano_kb_drum_kit_apply();
+    } else {
+        toy_midi_ctrl_set_prog(midi_keyboard_obj,
+                               piano_kb_instr_prog[piano_cur_instr], PIANO_INSTR_CHN);
+    }
+    log_info("instr %s prog %d ch %d\n", piano_kb_instr_name[piano_cur_instr],
+             piano_kb_is_drums() ? PIANO_KB_DRUM_KIT_PROG : piano_kb_instr_prog[piano_cur_instr],
+             piano_kb_midi_chn());
 }
 
 static void piano_set_pitch(s8 semitone)
 {
+    if (piano_kb_is_drums()) {
+        return;
+    }
     if (semitone < PIANO_KB_PITCH_MIN) {
         semitone = PIANO_KB_PITCH_MIN;
     }
@@ -500,11 +626,16 @@ static void piano_kb_decoder_apply_cfg(void)
                                      &midi_key_board_function_switch);
     }
 
+    piano_kb_midi_tempo_decay_apply();
     midi_on_off_callback_init(midi_keyboard_obj,
                               midi_ctrl_melody_trigger,
                               midi_ctrl_melody_stop_trigger);
-    toy_midi_ctrl_set_prog(midi_keyboard_obj,
-                           piano_kb_instr_prog[piano_cur_instr], PIANO_INSTR_CHN);
+    if (piano_kb_is_drums()) {
+        piano_kb_drum_kit_apply();
+    } else {
+        toy_midi_ctrl_set_prog(midi_keyboard_obj,
+                               piano_kb_instr_prog[piano_cur_instr], PIANO_INSTR_CHN);
+    }
 #if PIANO_KB_VM_EN
     piano_apply_volume();
 #endif
@@ -1157,7 +1288,7 @@ static void piano_enter_sleep(void)
 }
 #endif
 
-/* IN: 1=松开 0=按下，对 port 做边沿检测 */
+/* IN: 1=松开 0=按下，边沿检测 */
 static void piano_key_scan(void)
 {
     u16 port;
@@ -1187,6 +1318,28 @@ static void piano_key_scan(void)
     piano_key_hold_scan(port);
 #endif
 
+#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
+    if (piano_perf_mode) {
+        u16 changed = port ^ piano_stable_port;
+        if (changed) {
+#if PIANO_KB_IDLE_SLEEP_EN
+            piano_kb_idle_reset();
+#endif
+            log_info("port 0x%x\n", port);
+            for (i = 0; i < AW9523_KEY_NUM; i++) {
+                if (0 == (changed & BIT(i))) {
+                    continue;
+                }
+                if (0 == (port & BIT(i))) {
+                    piano_perf_handle_key(i);
+                }
+            }
+        }
+        piano_stable_port = port;
+        return;
+    }
+#endif
+
     changed = port ^ piano_stable_port;
     if (!changed) {
         return;
@@ -1206,19 +1359,8 @@ static void piano_key_scan(void)
                 continue;
             }
 #endif
-#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
-            if (piano_perf_mode) {
-                piano_perf_handle_key(i);
-                continue;
-            }
-#endif
             piano_note_on(i);
         } else {
-#if PIANO_KB_PERF_MODE_EN && SIMPLE_DEC_EN
-            if (piano_perf_mode) {
-                continue;
-            }
-#endif
             piano_note_off(i);
         }
     }
@@ -1371,7 +1513,7 @@ static u32 midi_ctrl_melody_stop_trigger(void *priv, u8 key, u8 chn)
 {
     log_info("OFF %d %d\n", key, chn);
     if (midi_keyboard_idle_cnt) {
-        midi_keyboard_idle_cnt--;
+    midi_keyboard_idle_cnt--;
     }
     return 0;
 }

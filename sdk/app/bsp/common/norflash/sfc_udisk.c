@@ -15,6 +15,8 @@ void sfc_udisk_ops_init(void)
     sfc_udisk_dev_ops.bulk_write = sfc_udisk_bulk_write;
 }
 
+
+
 static int sfc_udisk_bulk_read(struct device *device, void *buf, u32 len, u32 offset)
 {
     u32 byte_off;

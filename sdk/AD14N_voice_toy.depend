@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1791548375 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\aw9523\aw9523.c
+1791705295 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\aw9523\aw9523.c
 	"aw9523.h"
 	"iic_soft.h"
 	"gpio.h"
@@ -1634,7 +1634,7 @@
 	"dac_api.h"
 	"log.h"
 
-1791548386 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi_ctrl.c
+1793062184 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\toy_midi_ctrl.c
 	"toy_midi_ctrl.h"
 	"piano_keyboard_config.h"
 	"app_config.h"
@@ -1796,13 +1796,22 @@
 	"msg.h"
 	"app_config.h"
 
-1791546809 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\piano_keyboard_config.h
+1793062367 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\piano_keyboard_config.h
 	"midi_prog.h"
 
-1789863632 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\norflash\sfc_udisk.c
+1793060568 source:f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\norflash\sfc_udisk.c
 	"sfc_udisk.h"
 	"string.h"
 
 1789863632 f:\project\2026\fw-ad15-n-main\sdk\app\bsp\common\norflash\sfc_udisk.h
 	"device.h"
+
+1791706013 source:f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\piano_perf_melody.c
+	"piano_perf_melody.h"
+	"midi_prog.h"
+	"typedef.h"
+
+1791705995 f:\project\2026\fw-ad15-n-main\sdk\app\src\voice_toy\toy_midi\piano_perf_melody.h
+	"typedef.h"
+	"piano_keyboard_config.h"
 
